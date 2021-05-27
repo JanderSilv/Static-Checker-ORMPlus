@@ -11,8 +11,10 @@ P = {
   program → begin declaration-list end,
   declaration-list → declaration-list ; declaration,
   declaration-list → declaration 
-  declaration → variable-declaration,declaration →  function-declaration,
-  variable-declaration → type-specifier var-decl-list ,variable-declaration → type-specifier [] var-decl-list ;,
+  declaration → variable-declaration,
+  declaration → function-declaration,
+  variable-declaration → type-specifier var-decl-list ;,
+  variable-declaration → type-specifier [] var-decl-list ;,
   var-decl-list → var-decl-list , var-decl-id ,
   var-decl-list → var-decl-id,
   var-decl-id → Identifier,
