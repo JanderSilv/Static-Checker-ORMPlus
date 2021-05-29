@@ -1,0 +1,47 @@
+program = "begin" declaration-list "end".
+declaration-list = declaration {";" declaration}.
+declaration = variable-declaration | function-declaration.
+variable-declaration = type-specifier ["[" "]"] var-decl-list ";".
+
+var-decl-list = var-decl-id {"," var-decl-id}.
+var-decl-id = "Identifier" | "Identifier" "[" "Integer-Number" "]".
+
+type-specifier = "float" | "int" | "string" | "void" | "bool" | "char".
+function-declaration = type-specifier "Function" "(" params ")" statement.
+params = [param-list].
+param-list = param-type-list {";" param-type-list}.
+param-type-list = type-specifier param-id-list.
+
+param-id-list = param-id {"," param-id}.
+param-id = "Identifier" | "Identifier" "[" "Integer-Number" "]". 
+
+statement = expression-stmt | compound-stmt | selection-stmt |  iteration-stmt | return-stmt | break-stmt.
+compound-stmt = "{" local-declarations statement-list "}".
+statement-list = {statement}.
+local-declarations = {variable-declaration}.
+expression-stmt = [expression] ";".
+selection-stmt = "if" "(" expression ")" statement ["else" statement].
+iteration-stmt = "while" "(" expression ")" statement.
+return-stmt = "return" [expression] ";".
+break-stmt = "break" ";".
+expression = {var "="} simple-expression.
+
+var = "Identifier" | "Identifier" "[" "Integer-Number" "]".
+
+simple-expression = or-expression {"|" or-expression}.
+or-expression = unary-rel-expression {"&" unary-rel-expression}.
+unary-rel-expression = {"!"} rel-expression .
+rel-expression = add-expression [relop add-expression].
+relop = "=" | ">" | ">=" | "<" | "<=" | "==" | "!=" | "#".
+add-expression = term {addop term }.
+addop = "+" | "-".
+term =  unary-expression {mulop unary-expression}.
+mulop = "*" | "/".
+unary-expression = {"-"} factor.
+factor = "(" expression ")" | var | detour | constant.
+constant = number | string | "true" | "false".
+number = "Integer-number" | "Float-number".
+string = "Constant-String" | "Character".
+detour = "Function" "(" args ")".
+args = [arg-list].
+arg-list = factor {"," expression}.
