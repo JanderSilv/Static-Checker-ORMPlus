@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 
-var txt = "\"a\"\"b\"(\"c\" A)[\"a\"]{ \"b\"\"c\"}";
+var txt = "\"a\"\"b\"(\"c\"| A (\"a\"|\"b\"))|[\"a\"|\"b\"]{\"b\"\"c\"|A|B}"; /*"\"a\"\"b\"(\"c\" A)[\"a\"]{ \"b\"\"c\"}";*/
 
 Leitor l = new Leitor(txt);
 var res = l.Run();
@@ -50,13 +50,16 @@ public class Leitor
     public int j;
     public readonly int sj;
     public Leitor parent;
-    public string str;
+    public string content;
+    StringBuilder buffer = new StringBuilder();
+    List<No> parsed = new List<No>();
+    int antJ;
 
     public Leitor(string str, int sj = 1, Leitor parent = null)
     {
         this.sj = sj;
         this.parent = parent;
-        this.str = str;
+        this.content = str;
         j = sj;
     }
 
@@ -129,105 +132,157 @@ public class Leitor
         return -1;
     }
 
+    string[] DivideAlternativas(string str)
+    {
+        List<string> alternativas = new();
+        Stack<char> stack = new Stack<char>();
+        StringBuilder stb = new StringBuilder();
+
+        foreach (var c in str)
+        {
+            switch (c)
+            {
+                case '(' or '[' or '{':
+                    stack.Push(c);
+                    break;
+                case ')' or ']' or '}':
+                    char peek = stack.Peek();
+                    switch (peek, c)
+                    {
+                        case ('(', ')') or ('[', ']') or ('{', '}'):
+                            stack.Pop();
+                            break;
+                        default:
+                            throw new Exception("Fechamento nao esperado");
+                    }
+                    break;
+                case '|':
+                    if (stack.Count == 0)
+                    {
+                        alternativas.Add(stb.ToString());
+                        stb.Clear();
+                        continue;
+                    }
+                    break;
+            }
+
+            stb.Append(c);
+        }
+
+        alternativas.Add(stb.ToString());
+        return alternativas.ToArray();
+    }
     public List<No> Run(int? jp = null, int? ajp = null)
     {
-        currentToken = TokenType.none;
-        StringBuilder buffer = new StringBuilder();
-        List<No> parsed = new List<No>();
-        int antJ;
-        if (jp != null) { if (jp == 0) jp = 1; j = jp.Value; antJ = j - 1; }
-        else antJ = 0;
 
-        if (ajp != null) antJ = ajp.Value;
 
-        void noScope()
+        antJ = ajp ?? 0;
+
+        if (jp != null)
         {
-            parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j });
-            buffer.Clear();
-            antJ = j;
-            j++;
-            currentToken = TokenType.none;
+            j = jp.Value;
         }
 
-        int opcional(char c, int strIndex)
-        {
-            int fechamento = IndexFechamento(c, str, strIndex + 1);
-            string op = str[strIndex..(fechamento + 1)];
 
-            Leitor leitor = new(op[1..(op.Length - 1)], antJ, this);
-            var res = leitor.Run(j + 1, antJ);
-            parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
-            buffer.Clear();
-            antJ = j;
-            j = leitor.j;
+        string[] strings = DivideAlternativas(content);
+
+        int currentAntJ = antJ;
+        foreach (var s in strings)
+        {
+            Console.WriteLine($"Alternative: {s}");
+            if (s.Length == 0) continue;
             currentToken = TokenType.none;
-
-            return fechamento;
-        }
-
-        int recursao(char c, int strIndex)
-        {
-            int fechamento = IndexFechamento(c, str, strIndex + 1);
-            string op = str[strIndex..(fechamento + 1)];
-
-            Leitor leitor = new(op[1..(op.Length - 1)], j, this);
-
-            var res = leitor.Run(j + 1, j);
-            parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
             buffer.Clear();
-            antJ = j;
-            j = leitor.j;
-            currentToken = TokenType.none;
-            return fechamento;
-        }
 
-        for (int strIndex = 0; strIndex < str.Length; strIndex++)
-        {
-            char c = str[strIndex];
-            TokenType lastToken = currentToken;
-            currentToken = CheckType(c);
-            if (currentToken == TokenType.none)
+            antJ = currentAntJ;
+            for (int strIndex = 0; strIndex < s.Length; strIndex++)
             {
-                buffer.Clear();
-                continue;
-            }
-            if (currentToken == TokenType.espaco)
-            {
-                currentToken = TokenType.none;
-                continue;
-            }
+                char c = s[strIndex];
+                TokenType lastToken = currentToken;
+                currentToken = CheckType(c);
+                if (currentToken == TokenType.none)
+                {
+                    buffer.Clear();
+                    continue;
+                }
+                if (currentToken == TokenType.espaco)
+                {
+                    currentToken = TokenType.none;
+                    continue;
+                }
 
-            buffer.Append(c);
+                buffer.Append(c);
+
+                switch (currentToken)
+                {
+                    case TokenType.erro:
+                        throw new Exception($"char: {c} buffer: {buffer.ToString()} currentToken: {lastToken}");
+
+                    case TokenType.fimNaoTerminal or TokenType.fimTerminal:
+                        noScope();
+                        break;
+
+                    case TokenType.agrupamento or TokenType.opcional:
+                        strIndex = opcional(c, strIndex, s);
+                        break;
+
+                    case TokenType.recursividade:
+                        strIndex = recursao(c, strIndex, s);
+                        break;
+                }
+            }
 
             switch (currentToken)
             {
-                case TokenType.erro:
-                    throw new Exception($"char: {c} buffer: {buffer.ToString()} currentToken: {lastToken}");
-
-                case TokenType.fimNaoTerminal or TokenType.fimTerminal:
+                case TokenType.fimNaoTerminal or TokenType.fimTerminal or TokenType.terminal or TokenType.naoTerminal:
                     noScope();
-                    break;
-
-                case TokenType.agrupamento or TokenType.opcional:
-                    strIndex = opcional(c, strIndex);
-                    break;
-
-                case TokenType.recursividade:
-                    strIndex = recursao(c, strIndex);
                     break;
             }
         }
 
-
-        switch (currentToken)
-        {
-            case TokenType.fimNaoTerminal or TokenType.fimTerminal or TokenType.terminal or TokenType.naoTerminal:
-                noScope();
-                break;
-        }
-
-
         return parsed;
     }
+
+    void noScope()
+    {
+        parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j });
+        buffer.Clear();
+        antJ = j;
+        j++;
+        currentToken = TokenType.none;
+    }
+
+    int opcional(char c, int strIndex, string str)
+    {
+        int fechamento = IndexFechamento(c, str, strIndex + 1);
+        string op = str[strIndex..(fechamento + 1)];
+
+        Leitor leitor = new(op[1..(op.Length - 1)], antJ, this);
+        var res = leitor.Run(j + 1, antJ);
+        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
+        buffer.Clear();
+        antJ = j;
+        j = leitor.j;
+        currentToken = TokenType.none;
+
+        return fechamento;
+    }
+
+    int recursao(char c, int strIndex, string str)
+    {
+        int fechamento = IndexFechamento(c, str, strIndex + 1);
+        string op = str[strIndex..(fechamento + 1)];
+
+        Leitor leitor = new(op[1..(op.Length - 1)], j, this);
+
+        var res = leitor.Run(j + 1, j);
+        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
+        buffer.Clear();
+        antJ = j;
+        j = leitor.j;
+        currentToken = TokenType.none;
+        return fechamento;
+    }
+
 
 }
