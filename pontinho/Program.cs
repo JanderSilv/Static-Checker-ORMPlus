@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 
 
-var txt = "\"a\"\"b\"((\"c\" A))[\"a\"]{ \"b\"\"c\"}";
+var txt = "\"a\"\"b\"(\"c\" A)[\"a\"]{ \"b\"\"c\"}";
 
-Leitor l = new Leitor(txt, 0);
+Leitor l = new Leitor(txt);
 var res = l.Run();
 print(res);
 
@@ -14,7 +14,7 @@ void print(List<No> itens, int pad = 0)
 {
     foreach (var item in itens)
     {
-        var str = $"{item.value} = {item.index}";
+        var str = $"{item.indexStart}->{item.value}->{item.indexEnd}";
         str = str.PadLeft(pad);
         Console.WriteLine(str);
         if (item.childs != null) print(item.childs, pad + 1);
@@ -24,25 +24,22 @@ void print(List<No> itens, int pad = 0)
 public enum TokenType
 {
     none,
-
     naoTerminal,
     fimNaoTerminal,
-
     terminal,
     fimTerminal,
-
     agrupamento,
-
     opcional,
-
     recursividade,
-    erro
+    erro,
+    espaco
 }
 
 public struct No
 {
     public string value;
-    public int index;
+    public int indexEnd;
+    public int indexStart;
 
     public List<No> childs;
 };
@@ -50,18 +47,17 @@ public struct No
 public class Leitor
 {
     public TokenType currentToken = TokenType.none;
-    public int j = 0;
+    public int j;
     public readonly int sj;
     public Leitor parent;
     public string str;
 
-    public Leitor(string str, int sj = 0, Leitor parent = null)
+    public Leitor(string str, int sj = 1, Leitor parent = null)
     {
-        Console.WriteLine($"Reading: {str}");
         this.sj = sj;
         this.parent = parent;
-        j = sj;
         this.str = str;
+        j = sj;
     }
 
     TokenType CheckType(char c) => (c, currentToken) switch
@@ -69,7 +65,8 @@ public class Leitor
         ('"', TokenType.none) => TokenType.terminal,
         ('"', TokenType.terminal) => TokenType.fimTerminal,
         (_, TokenType.terminal) => TokenType.terminal,
-        (' ', _) => TokenType.none,
+        (' ', TokenType.none) => TokenType.espaco,
+
 
         ('(', TokenType.none) => TokenType.agrupamento,
         (')', TokenType.agrupamento) => TokenType.none,
@@ -82,10 +79,9 @@ public class Leitor
 
 
 
-        ('"' or '(' or ')' or '[' or ']' or '{' or '}' or ' ', TokenType.naoTerminal) => TokenType.fimNaoTerminal,
-        ((>= 'a' and <= 'z') or (>= 'A' or <= 'Z') or (>= '0' or <= '9'), TokenType.none) => TokenType.naoTerminal,
-        ((>= 'a' and <= 'z') or (>= 'A' or <= 'Z') or (>= '0' or <= '9'), TokenType.naoTerminal) => TokenType.naoTerminal,
-
+        ((>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9'), TokenType.none) => TokenType.naoTerminal,
+        ((>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9'), TokenType.naoTerminal) => TokenType.naoTerminal,
+        (_, TokenType.naoTerminal) => TokenType.fimNaoTerminal,
 
         (_, _) => TokenType.erro
     };
@@ -133,35 +129,36 @@ public class Leitor
         return -1;
     }
 
-    public List<No> Run(int? jp = null)
+    public List<No> Run(int? jp = null, int? ajp = null)
     {
         currentToken = TokenType.none;
         StringBuilder buffer = new StringBuilder();
         List<No> parsed = new List<No>();
-        if (jp != null) j = jp.Value;
-        int antJ = j;
+        int antJ;
+        if (jp != null) { if (jp == 0) jp = 1; j = jp.Value; antJ = j - 1; }
+        else antJ = 0;
+
+        if (ajp != null) antJ = ajp.Value;
 
         void noScope()
         {
-            j++;
-            parsed.Add(new No() { value = buffer.ToString(), index = j });
+            parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j });
             buffer.Clear();
-            currentToken = TokenType.none;
             antJ = j;
+            j++;
+            currentToken = TokenType.none;
         }
 
         int opcional(char c, int strIndex)
         {
             int fechamento = IndexFechamento(c, str, strIndex + 1);
-            Console.WriteLine($"ini {strIndex} end: {fechamento}");
             string op = str[strIndex..(fechamento + 1)];
 
-
             Leitor leitor = new(op[1..(op.Length - 1)], antJ, this);
-            antJ = j + 1;
-            var res = leitor.Run(j + 1);
-            parsed.Add(new No { value = op, index = antJ, childs = res });
+            var res = leitor.Run(j + 1, antJ);
+            parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
             buffer.Clear();
+            antJ = j;
             j = leitor.j;
             currentToken = TokenType.none;
 
@@ -175,10 +172,10 @@ public class Leitor
 
             Leitor leitor = new(op[1..(op.Length - 1)], j, this);
 
-            var res = leitor.Run(j);
-            antJ = j;
-            parsed.Add(new No { value = op, index = j, childs = res });
+            var res = leitor.Run(j + 1, j);
+            parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
             buffer.Clear();
+            antJ = j;
             j = leitor.j;
             currentToken = TokenType.none;
             return fechamento;
@@ -189,6 +186,17 @@ public class Leitor
             char c = str[strIndex];
             TokenType lastToken = currentToken;
             currentToken = CheckType(c);
+            if (currentToken == TokenType.none)
+            {
+                buffer.Clear();
+                continue;
+            }
+            if (currentToken == TokenType.espaco)
+            {
+                currentToken = TokenType.none;
+                continue;
+            }
+
             buffer.Append(c);
 
             switch (currentToken)
@@ -209,6 +217,15 @@ public class Leitor
                     break;
             }
         }
+
+
+        switch (currentToken)
+        {
+            case TokenType.fimNaoTerminal or TokenType.fimTerminal or TokenType.terminal or TokenType.naoTerminal:
+                noScope();
+                break;
+        }
+
 
         return parsed;
     }
