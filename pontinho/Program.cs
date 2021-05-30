@@ -2,22 +2,34 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Linq;
+using OfficeOpenXml;
 
 List<string> lines = new();
 var txt = File.ReadAllText(args.Length > 1 ? args[1] : "input.txt");
 
 lines.Add($"Resultado para: {txt}\n");
-
 txt = txt.Replace('.', ' ').Trim();
 
 Leitor l = new Leitor(txt);
 var res = l.Run();
 
-
 printPontinhos(res);
 buscarFinais(res);
-printTransicoes(res);
+
+var transicaoes = Transicoes(res);
+List<Transicao> trAtomo = transicaoes.Where(x => x.entrada != "ε").ToList();
+List<Transicao> trVazio = transicaoes.Where(x => x.entrada == "ε").ToList();
+
+printTransicoes(trAtomo);
+printTransicoes(trVazio);
+
+if (lines.Count > 0)
+{
+    File.WriteAllLines("out.txt", lines);
+}
+
+
 
 void buscarFinais(List<No> itens)
 {
@@ -56,26 +68,44 @@ void printPontinhos(List<No> itens)
     lines.Add(sb.ToString());
 }
 
-void printTransicoes(List<No> itens, int pad = 0)
+List<Transicao> Transicoes(List<No> itens)
 {
-
-    foreach (var item in itens)
+    List<Transicao> GetTransicao(List<No> i)
     {
-        var transicoes = item.Transicoes();
-
-        foreach (var t in transicoes)
+        List<Transicao> tr = new();
+        foreach (var t in i)
         {
-            lines.Add($"({t.estado},{t.entrada}) -> {t.prox}");
+            tr.AddRange(t.Transicoes());
+            if (t.childs != null) tr.AddRange(GetTransicao(t.childs));
         }
-        if (item.childs != null) printTransicoes(item.childs, pad + 1);
+        return tr;
+    }
+
+    return GetTransicao(itens);
+}
+
+void printTransicoes(IEnumerable<Transicao> itens)
+{
+    foreach (var t in itens)
+    {
+        lines.Add($"({t.estado},{t.entrada}) -> {t.prox}");
     }
 }
 
-if (lines.Count > 0)
+void saveExcel(List<Transicao> itens)
 {
+    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+    var file = new FileInfo("./notacao_tabular.xlsx");
+    if (file.Exists)
+    {
+        file.Delete();
+    }
 
-    File.WriteAllLines("out.txt", lines);
+    using var package = new ExcelPackage(file);
+    var worksheet = package.Workbook.Worksheets.Add("Notacao Tabular");
+    //Fazer a logica de criar a tabela
+
+
 }
-
 
 

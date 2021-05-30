@@ -37,6 +37,7 @@ public class No
         }
         return sb.ToString();
     }
+
     public override string ToString()
     {
         return type switch
@@ -49,7 +50,6 @@ public class No
             _ => ""
         };
     }
-
     public int[] childEnd()
     {
         List<int> vals = new List<int>();
@@ -73,33 +73,7 @@ public class No
         return vals.ToArray();
     }
 
-    string BuildCases(int[] values, int end)
-    {
-        StringBuilder sb = new StringBuilder();
-        if (values.Length == 0) return "";
-        if (values.Length > 1)
-        {
-            for (int i = 0; i < values.Length - 1; i++)
-            {
-                sb.Append($"({values[i]},ε) -> {end}\n");
-            }
-        }
 
-        sb.Append($"({values[values.Length - 1]},ε) -> {end}");
-        return sb.ToString();
-    }
-
-    public string TransicoesStr()
-    {
-        return type switch
-        {
-            NoType.atomo => $"{value}.{indexEnd} ",
-            NoType.parenteses => BuildCases(childEnd(), indexEnd),
-            NoType.colchete => $"{BuildCases(childEnd(), indexEnd)}\n({indexStart},ε) -> {indexEnd}",
-            NoType.chave => $"{BuildCases(childEnd(), indexEnd)}\n({indexStart},ε) -> {indexEnd}",
-            _ => ""
-        };
-    }
     public List<Transicao> TransicaoVazio(int[] values, int end)
     {
         List<Transicao> list = new List<Transicao>();
