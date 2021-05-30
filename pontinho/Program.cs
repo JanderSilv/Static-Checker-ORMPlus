@@ -58,11 +58,15 @@ void printPontinhos(List<No> itens)
 
 void printTransicoes(List<No> itens, int pad = 0)
 {
+
     foreach (var item in itens)
     {
-        var str = item.Transicoes();
-        str = str.PadLeft(pad);
-        lines.Add(str);
+        var transicoes = item.Transicoes();
+
+        foreach (var t in transicoes)
+        {
+            lines.Add($"({t.estado},{t.entrada}) -> {t.prox}");
+        }
         if (item.childs != null) printTransicoes(item.childs, pad + 1);
     }
 }
