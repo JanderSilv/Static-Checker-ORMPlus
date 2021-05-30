@@ -9,7 +9,7 @@ var txt = File.ReadAllText(args.Length > 1 ? args[1] : "input.txt");
 var otxt = txt.Clone();
 
 //pogzinha :D
-txt = txt.Replace("(", " ( ").Replace(")", " ) ").Replace("[", " [ ").Replace("]", " ] ").Replace("{", " { ").Replace("}", " } ");
+//txt = txt.Replace("(", " ( ").Replace(")", " ) ").Replace("[", " [ ").Replace("]", " ] ").Replace("{", " { ").Replace("}", " } ");
 
 Leitor l = new Leitor(txt);
 var res = l.Run();

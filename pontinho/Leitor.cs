@@ -21,8 +21,9 @@ public class Leitor
         j = sj;
     }
 
-    TokenType CheckType(char c) => (c, currentToken) switch
+    TokenType CheckType(char c, TokenType t) => (c, t) switch
     {
+
         ('"', TokenType.none) => TokenType.terminal,
         ('"', TokenType.terminal) => TokenType.fimTerminal,
         (_, TokenType.terminal) => TokenType.terminal,
@@ -159,7 +160,9 @@ public class Leitor
                 char c = s[strIndex];
 
                 TokenType lastToken = currentToken;
-                currentToken = CheckType(c);
+                currentToken = CheckType(c, currentToken);
+
+
 
                 if (currentToken == TokenType.none)
                 {
@@ -173,6 +176,22 @@ public class Leitor
                 }
 
                 buffer.Append(c);
+
+                if (currentToken == TokenType.naoTerminal)
+                {
+                    if (strIndex + 1 < s.Length)
+                    {
+                        var aux = new List<char>() { '(', ')', '[', ']', '{', '}', '\"' };
+                        if (aux.Contains(s[strIndex + 1]))
+                        {
+                            currentToken = TokenType.fimNaoTerminal;
+                        }
+                    }
+                    else
+                    {
+                        currentToken = TokenType.fimNaoTerminal;
+                    }
+                }
 
                 switch (currentToken)
                 {
