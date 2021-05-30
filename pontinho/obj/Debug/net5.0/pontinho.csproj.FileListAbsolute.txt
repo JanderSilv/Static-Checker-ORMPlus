@@ -1,0 +1,16 @@
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.exe
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.deps.json
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.runtimeconfig.json
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.runtimeconfig.dev.json
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.dll
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\ref\pontinho.dll
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\bin\Debug\net5.0\pontinho.pdb
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.csprojAssemblyReference.cache
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.GeneratedMSBuildEditorConfig.editorconfig
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.AssemblyInfoInputs.cache
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.AssemblyInfo.cs
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.csproj.CoreCompileInputs.cache
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.dll
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\ref\pontinho.dll
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.pdb
+U:\Dev\Projects\Static-Checker-ORMPlus\pontinho\obj\Debug\net5.0\pontinho.genruntimeconfig.cache
