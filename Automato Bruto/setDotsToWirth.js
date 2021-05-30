@@ -24,7 +24,7 @@ const setDots = () => {
     .replace(/"([\(\)\[\]\{\}]) . "/g, '"$1"') // Corrige não terminais com simbolo de agrupamento
     .replace(/\s+/g, ' ')
     .trim() // Remove espaços maiores que 1
-    .replace(/\s\.\s\./g, '.') // Remove a sentença ' . . ' do final
+    .replace(/\s\.\s\./g, ' .') // Remove a sentença ' . . ' do final
     .replace(/((\w|-)+)\s\.(\s=)/g, '$1$3') // Corrige declaração do terminal
     .replace(/((\w|-)+\s=\s\.)/g, '\n\n$1'); // Quebra linha nos terminais
   // console.log('wirthWithDots: ', wirthWithDots);
