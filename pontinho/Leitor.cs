@@ -224,7 +224,7 @@ public class Leitor
 
             if (strings.Length > 1 && cc < strings.Length)
             {
-                parsed.Add(new No() { value = "", indexStart = -1, indexEnd = -1, type = NoType.ou });
+                parsed.Add(new No() { value = "", indexStart = -1, indexEnd = currentAntJ, type = NoType.ou });
             }
             cc++;
         }

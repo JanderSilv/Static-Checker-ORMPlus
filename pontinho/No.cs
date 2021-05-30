@@ -39,11 +39,7 @@ public class No
 
         if (childs.Count() > 1)
             vals.Add(max);
-        foreach (var item in vals)
-        {
-            Console.Write($"{item} ");
-        }
-        Console.WriteLine();
+
         return vals.ToArray();
     }
 
@@ -58,10 +54,37 @@ public class No
                 sb.Append($"({values[i]},vazio) -> {end}\n");
             }
         }
+
         sb.Append($"({values[values.Length - 1]},vazio) -> {end}");
         return sb.ToString();
     }
+
+
+    string ResolveChilds()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < childs.Count; i++)
+        {
+            var item = childs[i];
+            if (i == childs.Count - 1 && item.type == NoType.ou) break;
+            sb.Append($"{item.ToString() }");
+        }
+        return sb.ToString();
+    }
     public override string ToString()
+    {
+        return type switch
+        {
+            NoType.atomo => $"{value}.{indexEnd} ",
+            NoType.parenteses => $"(.{indexStart} {ResolveChilds()}).{indexEnd} ",
+            NoType.colchete => $"[.{indexStart} {ResolveChilds()}].{indexEnd} ",
+            NoType.chave => $"{{.{indexEnd} {ResolveChilds()} }}.{indexEnd} ",
+            NoType.ou => $"|.{indexEnd} ",
+            _ => ""
+        };
+    }
+
+    public string Transicoes()
     {
         return type switch
         {
