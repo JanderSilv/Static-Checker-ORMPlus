@@ -145,6 +145,7 @@ public class Leitor
         string[] strings = DivideAlternativas(content);
 
         int currentAntJ = antJ;
+        int cc = 0;
         foreach (var s in strings)
         {
             if (s.Length == 0) continue;
@@ -182,8 +183,11 @@ public class Leitor
                         noScope();
                         break;
 
-                    case TokenType.agrupamento or TokenType.opcional:
+                    case TokenType.agrupamento:
                         strIndex = opcional(c, strIndex, s);
+                        break;
+                    case TokenType.opcional:
+                        strIndex = opcional(c, strIndex, s, true);
                         break;
 
                     case TokenType.recursividade:
@@ -198,6 +202,12 @@ public class Leitor
                     noScope();
                     break;
             }
+
+            if (strings.Length > 1 && cc < strings.Length)
+            {
+                parsed.Add(new No() { value = "", indexStart = -1, indexEnd = -1, type = NoType.ou });
+            }
+            cc++;
         }
 
         return parsed;
@@ -205,21 +215,21 @@ public class Leitor
 
     void noScope()
     {
-        parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j });
+        parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j, type = NoType.atomo });
         buffer.Clear();
         antJ = j;
         j++;
         currentToken = TokenType.none;
     }
 
-    int opcional(char c, int strIndex, string str)
+    int opcional(char c, int strIndex, string str, bool opcional = false)
     {
         int fechamento = IndexFechamento(c, str, strIndex + 1);
         string op = str[strIndex..(fechamento + 1)];
 
         Leitor leitor = new(op[1..(op.Length - 1)], antJ, this);
         var res = leitor.Run(j + 1, antJ);
-        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
+        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res, type = opcional ? NoType.colchete : NoType.parenteses });
         buffer.Clear();
         antJ = j;
         j = leitor.j;
@@ -236,7 +246,7 @@ public class Leitor
         Leitor leitor = new(op[1..(op.Length - 1)], j, this);
 
         var res = leitor.Run(j + 1, j);
-        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res });
+        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res, type = NoType.chave });
         buffer.Clear();
         antJ = j;
         j = leitor.j;

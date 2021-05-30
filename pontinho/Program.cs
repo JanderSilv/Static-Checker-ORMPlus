@@ -20,7 +20,7 @@ void print(List<No> itens, int pad = 0)
 {
     foreach (var item in itens)
     {
-        var str = $"{item.indexStart}->{item.value}->{item.indexEnd}";
+        var str = item.ToString();
         str = str.PadLeft(pad);
         lines.Add(str);
         if (item.childs != null) print(item.childs, pad + 1);
