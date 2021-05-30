@@ -29,6 +29,7 @@ if (lines.Count > 0)
     File.WriteAllLines("out.txt", lines);
 }
 
+//saveExcel(transicaoes);
 
 
 void buscarFinais(List<No> itens)
