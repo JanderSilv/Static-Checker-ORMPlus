@@ -277,10 +277,10 @@ public class Leitor
         {
             str = str[(strIndex + 1)..end];
         }
-        catch (System.Exception e)
+        catch (System.Exception)
         {
             Console.WriteLine($"Try to substring at {(strIndex + 1)} - {end}");
-            throw e;
+
         }
 
 
@@ -302,10 +302,10 @@ public class Leitor
         {
             str = str[(strIndex + 1)..end];
         }
-        catch (System.Exception e)
+        catch (System.Exception)
         {
             Console.WriteLine($"Try to substring at {(strIndex + 1)} - {end}");
-            throw e;
+
         }
 
         Leitor leitor = new(str, j, this);

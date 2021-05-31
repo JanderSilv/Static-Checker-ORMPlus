@@ -17,9 +17,9 @@ var res = l.Run();
 printPontinhos(res);
 buscarFinais(res);
 
-var transicaoes = Transicoes(res);
-List<Transicao> trAtomo = transicaoes.Where(x => x.entrada != "ε").ToList();
-List<Transicao> trVazio = transicaoes.Where(x => x.entrada == "ε").ToList();
+var transicoes = Transicoes(res);
+List<Transicao> trAtomo = transicoes.Where(x => x.entrada != "ε").ToList();
+List<Transicao> trVazio = transicoes.Where(x => x.entrada == "ε").ToList();
 
 printTransicoes(trAtomo);
 printTransicoes(trVazio);
@@ -29,7 +29,8 @@ if (lines.Count > 0)
     File.WriteAllLines("out.txt", lines);
 }
 
-//saveExcel(transicaoes);
+
+saveExcel(transicoes);
 
 
 void buscarFinais(List<No> itens)
@@ -105,8 +106,51 @@ void saveExcel(List<Transicao> itens)
 
     using var package = new ExcelPackage(file);
     var worksheet = package.Workbook.Worksheets.Add("Notacao Tabular");
-    //Fazer a logica de criar a tabela
 
+
+    var groups = transicoes.GroupBy(x => x.entrada);
+
+    int qntStates = transicoes.Max(x => x.prox) + 1;
+
+    Console.WriteLine($"Quantidade Estados: {qntStates}");
+
+    for (int i = 0; i < qntStates; i++)
+    {
+        worksheet.Cells[i + 2, 1].Value = i;
+    }
+
+    int collumn = 2;
+    IGrouping<string, Transicao> vazio = null;
+    foreach (var g in groups)
+    {
+        string key = g.Key;
+        if (key == "ε")
+        {
+            vazio = g;
+            continue;
+        }
+
+        worksheet.Cells[1, collumn].Value = key;
+        var tr = g.OrderBy(x => x.estado).ToArray();
+
+
+        foreach (var t in tr)
+        {
+            worksheet.Cells[t.estado + 2, collumn].Value = t.prox;
+
+        }
+        collumn++;
+    }
+
+    worksheet.Cells[1, collumn].Value = "ε";
+
+    foreach (var t in vazio.OrderBy(x => x.estado).ToArray())
+    {
+        worksheet.Cells[t.estado + 2, collumn].Value = t.prox;
+
+    }
+
+    package.SaveAs(file);
 
 }
 
