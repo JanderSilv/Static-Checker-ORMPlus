@@ -84,8 +84,9 @@ public class No
             {
                 list.Add(new Transicao() { estado = values[i], entrada = "ε", prox = end });
             }
+            list.Add(new Transicao() { estado = values[values.Length - 1], entrada = "ε", prox = end });
         }
-        list.Add(new Transicao() { estado = values[values.Length - 1], entrada = "ε", prox = end });
+        
 
         return list;
     }

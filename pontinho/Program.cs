@@ -9,7 +9,7 @@ List<string> lines = new();
 var txt = File.ReadAllText(args.Length > 1 ? args[1] : "input.txt");
 
 lines.Add($"Resultado para: {txt}\n");
-txt = txt.Replace('.', ' ').Trim();
+txt = txt.Replace('.', ' ').Replace('\n', ' ').Trim();
 
 Leitor l = new Leitor(txt);
 var res = l.Run();

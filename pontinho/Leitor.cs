@@ -142,11 +142,12 @@ public class Leitor
             j = jp.Value;
         }
 
-
+        int countchar = 0;
         string[] strings = DivideAlternativas(content);
 
         int currentAntJ = antJ;
         int cc = 0;
+
         foreach (var s in strings)
         {
             if (s.Length == 0) continue;
@@ -196,7 +197,7 @@ public class Leitor
                 switch (currentToken)
                 {
                     case TokenType.erro:
-                        throw new Exception($"char: {c} buffer: {buffer.ToString()} currentToken: {lastToken}");
+                        throw new Exception($"char: {c} buffer: {buffer.ToString()} currentToken: {lastToken} at char: {countchar}");
 
                     case TokenType.fimNaoTerminal or TokenType.fimTerminal:
                         noScope();
@@ -213,6 +214,8 @@ public class Leitor
                         strIndex = recursao(c, strIndex, s);
                         break;
                 }
+
+                countchar++;
             }
 
             switch (currentToken)
@@ -231,6 +234,8 @@ public class Leitor
 
         return parsed;
     }
+
+
 
     void noScope()
     {
