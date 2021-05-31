@@ -90,6 +90,7 @@ void printTransicoes(IEnumerable<Transicao> itens)
     foreach (var t in itens)
     {
         lines.Add($"({t.estado},{t.entrada}) -> {t.prox}");
+        //lines.Add($"{t.estado}_{t.entrada}_{t.prox}");
     }
 }
 

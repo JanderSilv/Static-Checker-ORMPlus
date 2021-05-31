@@ -1,13 +1,15 @@
 public enum TokenType
 {
     none,
+
     naoTerminal,
-    fimNaoTerminal,
     terminal,
-    fimTerminal,
+
+    atomoLido,
+
     agrupamento,
     opcional,
     recursividade,
-    erro,
-    espaco
+    fechamento
+
 }

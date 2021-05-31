@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 public class Leitor
 {
@@ -24,31 +25,33 @@ public class Leitor
     TokenType CheckType(char c, TokenType t) => (c, t) switch
     {
 
-        ('"', TokenType.none) => TokenType.terminal,
-        ('"', TokenType.terminal) => TokenType.fimTerminal,
-        (_, TokenType.terminal) => TokenType.terminal,
-        (' ', TokenType.none) => TokenType.espaco,
+        (not '"', TokenType.terminal) => TokenType.terminal,
+
+        ('(', not TokenType.terminal) => TokenType.agrupamento,
+        (')', TokenType.agrupamento) => TokenType.fechamento,
+        (')', not TokenType.agrupamento) => throw new Exception($"Fechamento sem abertura para ).\n({t},{buffer.ToString()} << {c})-> ?"),
+
+        ('[', not TokenType.terminal) => TokenType.opcional,
+        (']', TokenType.opcional) => TokenType.fechamento,
+        (']', not TokenType.opcional) => throw new Exception($"Fechamento sem abertura para ].\n({t},{buffer.ToString()} << {c})-> ?"),
+
+        ('{', not TokenType.terminal) => TokenType.recursividade,
+        ('}', TokenType.recursividade) => TokenType.fechamento,
+        ('}', not TokenType.recursividade) => throw new Exception($"Fechamento sem abertura para }}.\n({t},{buffer.ToString()} << {c})-> ?"),
+
+        ('"', not TokenType.terminal) => TokenType.terminal,
+
+        ('"', TokenType.terminal) => TokenType.atomoLido,
 
 
-        ('(', TokenType.none) => TokenType.agrupamento,
-        (')', TokenType.agrupamento) => TokenType.none,
+        (' ', not TokenType.terminal) => TokenType.none,
 
-        ('[', TokenType.none) => TokenType.opcional,
-        (']', TokenType.opcional) => TokenType.none,
+        (_, not TokenType.terminal) => TokenType.naoTerminal,
 
-        ('{', TokenType.none) => TokenType.recursividade,
-        ('}', TokenType.recursividade) => TokenType.none,
-
-
-
-        ((>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9'), TokenType.none) => TokenType.naoTerminal,
-        ((>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9'), TokenType.naoTerminal) => TokenType.naoTerminal,
-        (_, TokenType.naoTerminal) => TokenType.fimNaoTerminal,
-
-        (_, _) => TokenType.erro
+        //(_, _) => throw new Exception($"Transicao não definida: ({t},{buffer.ToString()} + {c})-> ?"),
     };
 
-    int IndexFechamento(char abertura, string str, int start)
+    int IndexFechamento(char abertura, string str)
     {
         char fechamento = abertura switch
         {
@@ -59,10 +62,33 @@ public class Leitor
         };
 
         Stack<char> stack = new Stack<char>();
+        StringBuilder readed = new();
+
         stack.Push(abertura);
 
-        for (int i = start; i < str.Length; i++)
+        TokenType token = TokenType.none;
+        readed.Append(abertura);
+        for (int i = 1; i < str.Length; i++)
         {
+            readed.Append(str[i]);
+            if (token == TokenType.terminal)
+            {
+                if (str[i] == '\"')
+                {
+                    token = TokenType.none;
+                }
+                continue;
+            }
+
+            if (token == TokenType.none)
+            {
+                if (str[i] == '\"')
+                {
+                    token = TokenType.terminal;
+                    continue;
+                }
+            }
+
             switch (str[i])
             {
                 case '(' or '[' or '{':
@@ -76,7 +102,7 @@ public class Leitor
                             stack.Pop();
                             break;
                         default:
-                            throw new Exception("Fechamento nao esperado");
+                            throw new Exception($"Fechamento nao esperado\nPilha final: {stackToString()}\nPassado: {str}\nLidos: {readed.ToString()}");
                     }
                     break;
             }
@@ -88,7 +114,17 @@ public class Leitor
 
         }
 
-        return -1;
+        string stackToString()
+        {
+            StringBuilder sb = new();
+            foreach (var item in stack)
+            {
+                sb.Append(item);
+                sb.Append(' ');
+            }
+            return sb.ToString();
+        }
+        throw new Exception($"Fechamento não encontrado para {abertura}\nPilha final: {stackToString()}\nPassado: {str}\nLidos: {readed.ToString()}");
     }
 
     string[] DivideAlternativas(string str)
@@ -131,151 +167,156 @@ public class Leitor
         alternativas.Add(stb.ToString());
         return alternativas.ToArray();
     }
-    public List<No> Run(int? jp = null, int? ajp = null)
+
+    public List<No> Run(int? j = null, int? aj = null)
     {
-
-
-        antJ = ajp ?? 0;
-
-        if (jp != null)
-        {
-            j = jp.Value;
-        }
-
-        int countchar = 0;
         string[] strings = DivideAlternativas(content);
+        antJ = aj ?? 0;
+        this.j = j ?? this.j;
 
-        int currentAntJ = antJ;
-        int cc = 0;
-
+        int i = 0;
         foreach (var s in strings)
         {
-            if (s.Length == 0) continue;
-
-            currentToken = TokenType.none;
-            buffer.Clear();
-
-            antJ = currentAntJ;
-            for (int strIndex = 0; strIndex < s.Length; strIndex++)
+            if (s.Length != 0)
             {
-                char c = s[strIndex];
-
-                TokenType lastToken = currentToken;
-                currentToken = CheckType(c, currentToken);
-
-
-
-                if (currentToken == TokenType.none)
-                {
-                    buffer.Clear();
-                    continue;
-                }
-                if (currentToken == TokenType.espaco)
-                {
-                    currentToken = TokenType.none;
-                    continue;
-                }
-
-                buffer.Append(c);
-
-                if (currentToken == TokenType.naoTerminal)
-                {
-                    if (strIndex + 1 < s.Length)
-                    {
-                        var aux = new List<char>() { '(', ')', '[', ']', '{', '}', '\"' };
-                        if (aux.Contains(s[strIndex + 1]))
-                        {
-                            currentToken = TokenType.fimNaoTerminal;
-                        }
-                    }
-                    else
-                    {
-                        currentToken = TokenType.fimNaoTerminal;
-                    }
-                }
-
-                switch (currentToken)
-                {
-                    case TokenType.erro:
-                        throw new Exception($"char: {c} buffer: {buffer.ToString()} currentToken: {lastToken} at char: {countchar}");
-
-                    case TokenType.fimNaoTerminal or TokenType.fimTerminal:
-                        noScope();
-                        break;
-
-                    case TokenType.agrupamento:
-                        strIndex = opcional(c, strIndex, s);
-                        break;
-                    case TokenType.opcional:
-                        strIndex = opcional(c, strIndex, s, true);
-                        break;
-
-                    case TokenType.recursividade:
-                        strIndex = recursao(c, strIndex, s);
-                        break;
-                }
-
-                countchar++;
+                RunString(s, antJ, i, strings.Length);
             }
-
-            switch (currentToken)
-            {
-                case TokenType.fimNaoTerminal or TokenType.fimTerminal or TokenType.terminal or TokenType.naoTerminal:
-                    noScope();
-                    break;
-            }
-
-            if (strings.Length > 1 && cc < strings.Length)
-            {
-                parsed.Add(new No() { value = "", indexStart = -1, indexEnd = currentAntJ, type = NoType.ou });
-            }
-            cc++;
+            i++;
         }
 
         return parsed;
     }
 
+    public void RunString(string s, int currentAntJ, int index, int countStrings)
+    {
+        currentToken = TokenType.none;
+        buffer.Clear();
+        antJ = currentAntJ;
+        TokenType lastToken;
+
+        for (int strIndex = 0; strIndex < s.Length; strIndex++)
+        {
+            char c = s[strIndex];
+
+            lastToken = currentToken;
+
+            currentToken = CheckType(c, currentToken);
+
+            if (lastToken == TokenType.naoTerminal && currentToken != TokenType.naoTerminal)
+            {
+                parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j, type = NoType.atomo });
+                buffer.Clear();
+                antJ = j;
+                j++;
+
+            }
+
+            buffer.Append(c);
 
 
-    void noScope()
+            switch (currentToken)
+            {
+                case TokenType.none:
+                    buffer.Clear();
+                    break;
+
+                case TokenType.fechamento:
+                    buffer.Clear();
+                    currentToken = TokenType.none;
+                    break;
+
+                case TokenType.atomoLido:
+                    Atomo();
+                    currentToken = TokenType.none;
+                    break;
+
+                case TokenType.agrupamento:
+                    strIndex = OpcionalOuAgrupamento(c, s, strIndex);
+                    break;
+
+                case TokenType.opcional:
+                    strIndex = OpcionalOuAgrupamento(c, s, strIndex, true);
+                    break;
+
+                case TokenType.recursividade:
+                    strIndex = Recursao(c, s, strIndex);
+
+                    break;
+            }
+
+        }
+
+        switch (currentToken)
+        {
+            case TokenType.atomoLido or TokenType.terminal or TokenType.naoTerminal:
+                Atomo();
+                break;
+        }
+
+        if (countStrings > 1 && index < countStrings)
+        {
+            parsed.Add(new No() { value = "", indexStart = -1, indexEnd = currentAntJ, type = NoType.ou });
+        }
+
+    }
+
+    void Atomo()
     {
         parsed.Add(new No() { value = buffer.ToString(), indexStart = antJ, indexEnd = j, type = NoType.atomo });
         buffer.Clear();
         antJ = j;
         j++;
-        currentToken = TokenType.none;
+
     }
 
-    int opcional(char c, int strIndex, string str, bool opcional = false)
+    int OpcionalOuAgrupamento(char c, string str, int strIndex, bool opcional = false)
     {
-        int fechamento = IndexFechamento(c, str, strIndex + 1);
-        string op = str[strIndex..(fechamento + 1)];
+        int end = strIndex + IndexFechamento(c, str[strIndex..]);
 
-        Leitor leitor = new(op[1..(op.Length - 1)], antJ, this);
+        try
+        {
+            str = str[(strIndex + 1)..end];
+        }
+        catch (System.Exception e)
+        {
+            Console.WriteLine($"Try to substring at {(strIndex + 1)} - {end}");
+            throw e;
+        }
+
+
+        Leitor leitor = new(str, antJ, this);
         var res = leitor.Run(j + 1, antJ);
-        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res, type = opcional ? NoType.colchete : NoType.parenteses });
+        parsed.Add(new No { value = str, indexStart = antJ, indexEnd = j, childs = res, type = opcional ? NoType.colchete : NoType.parenteses });
         buffer.Clear();
         antJ = j;
         j = leitor.j;
-        currentToken = TokenType.none;
 
-        return fechamento;
+        return end;
     }
 
-    int recursao(char c, int strIndex, string str)
+    int Recursao(char c, string str, int strIndex)
     {
-        int fechamento = IndexFechamento(c, str, strIndex + 1);
-        string op = str[strIndex..(fechamento + 1)];
+        int end = strIndex + IndexFechamento(c, str[strIndex..]);
 
-        Leitor leitor = new(op[1..(op.Length - 1)], j, this);
+        try
+        {
+            str = str[(strIndex + 1)..end];
+        }
+        catch (System.Exception e)
+        {
+            Console.WriteLine($"Try to substring at {(strIndex + 1)} - {end}");
+            throw e;
+        }
+
+        Leitor leitor = new(str, j, this);
 
         var res = leitor.Run(j + 1, j);
-        parsed.Add(new No { value = op, indexStart = antJ, indexEnd = j, childs = res, type = NoType.chave });
+        parsed.Add(new No { value = str, indexStart = antJ, indexEnd = j, childs = res, type = NoType.chave });
         buffer.Clear();
         antJ = j;
         j = leitor.j;
-        currentToken = TokenType.none;
-        return fechamento;
+
+        return end;
     }
 
 
