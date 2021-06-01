@@ -10,6 +10,7 @@ public class Reader
     GramSource source;
     Context context;
     List<Transicao> finais = new List<Transicao>();
+    List<int> saidas = new List<int>();
     private int oustide;
 
     StringBuilder content = new();
@@ -46,7 +47,11 @@ public class Reader
 
     public List<int> GetFinais()
     {
-        return new();//finais.Select(x => x.proximo).ToList();
+        if (context == Context.None && initCounter == 0)
+            saidas.AddRange(finais.Select(x => x.proximo).ToList());
+        else
+            saidas.Add(oustide);
+        return saidas.Distinct().ToList();
     }
 
     public string GetContent()
@@ -71,7 +76,7 @@ public class Reader
 
         while ((currentChar = source.GetNext()) != '\0')
         {
-            if (currentChar == '\0' || currentChar == '\n') break;
+            if (currentChar == '\0' || currentChar == '\n') continue;
             switch (currentChar)
             {
                 case '(':
@@ -112,6 +117,7 @@ public class Reader
             Reader r = new Reader(source, lastCounter, context: Context.Group);
             r.SetBound(NextCounter());
             transicoes.AddRange(r.Run());
+
             content.Append(r.GetContent());
         }
         void colchetes()
@@ -121,6 +127,7 @@ public class Reader
             Reader r = new Reader(source, lastCounter, context: Context.Optional);
             r.SetBound(NextCounter());
             transicoes.AddRange(r.Run());
+
             content.Append(r.GetContent());
         }
         void chaves()
@@ -130,13 +137,16 @@ public class Reader
             Reader r = new Reader(source, 0, context: Context.Recursive);
             r.SetBound(counter);
             transicoes.AddRange(r.Run());
+
             content.Append(r.GetContent());
         }
         void ou()
         {
             clearBuffer();
             AddFinal(lastToken);
+
             lastCounter = initCounter;
+
             content.Append($" |.{initCounter} ");
         }
         void terminal()
@@ -169,6 +179,8 @@ public class Reader
 
         void addAtom()
         {
+            string s = sb.ToString();
+            if (string.IsNullOrWhiteSpace(s)) return;
             lastToken = new() { estado = lastCounter, entrada = sb.ToString(), proximo = counter };
             content.Append($"{lastToken.entrada}.{lastToken.proximo} ");
             transicoes.Add(lastToken);
