@@ -1,0 +1,34 @@
+Entrada:
+"(" expression ")" | ("Identifier" | "Identifier" "[" "Integer-Number" "]") | ("Function" "(" [arg-list] ")") | "Integer-number" | "Float-number" | "Constant-String" | "Character" | "true" | "false" 
+ 
+
+Entrada Processada:
+.0 "(".1 expression.2 ")".3  |.0 (.0 "Identifier".5  |.0 "Identifier".6 "[".7 "Integer-Number".8 "]".9 ).5 |.0 (.0 "Function".11 "(".12 [.12 arg-list.14 ].14")".15 ).11 |.0 "Integer-number".16  |.0 "Float-number".17  |.0 "Constant-String".18  |.0 "Character".19  |.0 "true".20  |.0 "false".21 
+
+Início: 0
+Finais: 3 5 11 16 17 18 19 20 21
+
+Transicoes:
+(0,"(")->1
+(1,expression)->2
+(2,")")->3
+(0,"Identifier")->5
+(0,"Identifier")->6
+(6,"[")->7
+(7,"Integer-Number")->8
+(8,"]")->9
+(0,"Function")->11
+(11,"(")->12
+(12,arg-list)->14
+(13,")")->15
+(0,"Integer-number")->16
+(0,"Float-number")->17
+(0,"Constant-String")->18
+(0,"Character")->19
+(0,"true")->20
+(0,"false")->21
+(5,ε)->4
+(9,ε)->4
+(12,ε)->13
+(14,ε)->13
+(15,ε)->10
