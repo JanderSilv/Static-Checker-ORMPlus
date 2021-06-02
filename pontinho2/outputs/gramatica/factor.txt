@@ -1,33 +1,32 @@
 Entrada:
-factor = = "(" expression ")" | ("Identifier" | "Identifier" "[" "Integer-Number" "]") | ("Function" "(" [arg-list] ")") | "Integer-number" | "Float-number" | "Constant-String" | "Character" | "true" | "false".
+factor = "(" expression ")" | ("Identifier" | "Identifier" "[" "Integer-Number" "]") | ("Function" "(" [arg-list] ")") | "Integer-number" | "Float-number" | "Constant-String" | "Character" | "true" | "false".
 Saída:
-factor = .0 =.1 "(".2 expression.3 ")".4  |.0 (.0 "Identifier".6  |.0 "Identifier".7 "[".8 "Integer-Number".9 "]".10 ).6 |.0 (.0 "Function".12 "(".13 [.13 arg-list.15 ].15")".16 ).12 |.0 "Integer-number".17  |.0 "Float-number".18  |.0 "Constant-String".19  |.0 "Character".20  |.0 "true".21  |.0 "false".22 
+factor = .0 "(".1 expression.2 ")".3  |.0 (.0 "Identifier".5  |.0 "Identifier".6 "[".7 "Integer-Number".8 "]".9 ).4  |.0 (.0 "Function".11 "(".12 [.12 arg-list.14 ].13 ")".15 ).10  |.0 "Integer-number".16  |.0 "Float-number".17  |.0 "Constant-String".18  |.0 "Character".19  |.0 "true".20  |.0 "false".21 
 
 Início: 0
-Finais: 4,17,18,19,20,21,22
+Finais: 3,4,10,16,17,18,19,20,21
 
 Transicoes:
-(0,=)->1
-(1,"(")->2
-(2,expression)->3
-(3,")")->4
+(0,"(")->1
+(0,"Identifier")->5
 (0,"Identifier")->6
-(0,"Identifier")->7
-(7,"[")->8
-(8,"Integer-Number")->9
-(9,"]")->10
-(0,"Function")->12
-(12,"(")->13
-(13,arg-list)->15
-(14,")")->16
-(0,"Integer-number")->17
-(0,"Float-number")->18
-(0,"Constant-String")->19
-(0,"Character")->20
-(0,"true")->21
-(0,"false")->22
-(6,ε)->5
-(10,ε)->5
-(13,ε)->14
-(15,ε)->14
-(16,ε)->11
+(0,"Function")->11
+(0,"Integer-number")->16
+(0,"Float-number")->17
+(0,"Constant-String")->18
+(0,"Character")->19
+(0,"true")->20
+(0,"false")->21
+(1,expression)->2
+(2,")")->3
+(6,"[")->7
+(7,"Integer-Number")->8
+(8,"]")->9
+(11,"(")->12
+(12,arg-list)->14
+(13,")")->15
+(5,ε)->3
+(9,ε)->3
+(12,ε)->13
+(14,ε)->12
+(15,ε)->9

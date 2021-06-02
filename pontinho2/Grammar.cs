@@ -28,8 +28,10 @@ public class Grammar
         while (skip < fileData.Length)
         {
             string str = string.Concat(fileData.Skip(skip).TakeWhile(x => x != '.')).Trim();
-            string nTerminal = string.Concat(str.TakeWhile(x => x != '=')).Trim();
+            string nTerminal = string.Concat(str.TakeWhile(x => x != '='));
             string data = string.Concat(str.Skip(nTerminal.Length + 1)).Trim();
+
+            nTerminal = nTerminal.Trim();
 
             if (string.IsNullOrWhiteSpace(str) || string.IsNullOrWhiteSpace(nTerminal) || string.IsNullOrWhiteSpace(data))
             {
@@ -62,8 +64,8 @@ public class Grammar
         foreach (var nt in nTerminais)
         {
             List<string> tofile = new(transitions[nt].Count);
-            var atom = transitions[nt].Where(x => x.entrada != "ε");
-            var empty = transitions[nt].Where(x => x.entrada == "ε");
+            var atom = transitions[nt].Where(x => x.entrada != "ε").OrderBy(x => x.estado);
+            var empty = transitions[nt].Where(x => x.entrada == "ε").OrderBy(x => x.estado);
 
             tofile.Add($"Entrada:\n{nt} = {inputs[nt]}.");
             tofile.Add($"Saída:\n{nt} = {outputs[nt]}");

@@ -7,12 +7,12 @@ public class Reader
     static int counter = 0;
     private int initCounter;
     private int lastCounter;
+    private int outCounter;
+
     GramSource source;
     Context context;
     List<Transicao> finais = new List<Transicao>();
     List<int> saidas = new List<int>();
-    private int oustide;
-
     StringBuilder content = new();
 
     public Reader(GramSource source, int init = 0, int? counter = null, Context context = Context.None)
@@ -29,39 +29,41 @@ public class Reader
 
     public Reader SetBound(int i)
     {
-        oustide = i;
+        outCounter = i;
         if (context == Context.Recursive)
         {
-            lastCounter = oustide;
+            lastCounter = outCounter;
             initCounter = lastCounter;
-            counter = oustide + 1;
+            counter = outCounter + 1;
         }
         return this;
     }
 
     int NextCounter()
     {
+        int c = counter;
         lastCounter = counter++;
-        return counter;
+        return c;
     }
 
     public List<int> GetFinais()
     {
-        if (context == Context.None && initCounter == 0)
-            saidas.AddRange(finais.Select(x => x.proximo).ToList());
-        else
-            saidas.Add(oustide);
-        return saidas.Distinct().ToList();
+        return saidas;
     }
 
+    public int GetLast()
+    {
+        if (context == Context.None) return lastCounter;
+        return outCounter;
+    }
     public string GetContent()
     {
         return context switch
         {
             Context.None => content.ToString(),
-            Context.Group => $"(.{initCounter} {content.ToString()}).{oustide}",
-            Context.Optional => $"[.{initCounter} {content.ToString()}].{oustide}",
-            Context.Recursive => $"{{.{initCounter} {content.ToString()} }}.{oustide}",
+            Context.Group => $"(.{initCounter} {content.ToString()}).{outCounter} ",
+            Context.Optional => $"[.{initCounter} {content.ToString()}].{outCounter} ",
+            Context.Recursive => $"{{.{initCounter} {content.ToString()} }}.{outCounter} ",
             _ => ""
         };
     }
@@ -92,6 +94,7 @@ public class Reader
                 case ')' or ']' or '}':
                     clearBuffer();
                     handleVoids();
+                    saidas.Add(GetLast());
                     return transicoes;
                 case '|':
                     ou();
@@ -116,7 +119,9 @@ public class Reader
             clearBuffer();
             Reader r = new Reader(source, lastCounter, context: Context.Group);
             r.SetBound(NextCounter());
-            transicoes.AddRange(r.Run());
+            var res = r.Run();
+            lastCounter = r.GetLast();
+            transicoes.AddRange(res);
 
             content.Append(r.GetContent());
         }
@@ -126,7 +131,9 @@ public class Reader
             transicoes.Add(new() { entrada = "ε", estado = lastCounter, proximo = counter });
             Reader r = new Reader(source, lastCounter, context: Context.Optional);
             r.SetBound(NextCounter());
-            transicoes.AddRange(r.Run());
+            var res = r.Run();
+            lastCounter = r.GetLast();
+            transicoes.AddRange(res);
 
             content.Append(r.GetContent());
         }
@@ -136,7 +143,9 @@ public class Reader
             transicoes.Add(new() { entrada = "ε", estado = lastCounter, proximo = counter });
             Reader r = new Reader(source, 0, context: Context.Recursive);
             r.SetBound(counter);
-            transicoes.AddRange(r.Run());
+            var res = r.Run();
+            lastCounter = r.GetLast();
+            transicoes.AddRange(res);
 
             content.Append(r.GetContent());
         }
@@ -145,6 +154,7 @@ public class Reader
             clearBuffer();
             AddFinal(lastToken);
 
+            saidas.Add(lastCounter);
             lastCounter = initCounter;
 
             content.Append($" |.{initCounter} ");
@@ -166,7 +176,7 @@ public class Reader
             {
                 foreach (var item in finais)
                 {
-                    transicoes.Add(new() { entrada = "ε", estado = item.proximo, proximo = oustide - 1 });
+                    transicoes.Add(new() { entrada = "ε", estado = item.proximo, proximo = outCounter - 1 });
                 }
             }
 
@@ -189,7 +199,13 @@ public class Reader
         }
 
         handleVoids();
+
         transicoes.RemoveAll(x => string.IsNullOrEmpty(x.entrada) || string.IsNullOrWhiteSpace(x.entrada));
+        foreach (var item in transicoes)
+        {
+            item.entrada = item.entrada.Trim();
+        }
+        saidas.Add(GetLast());
         return transicoes;
     }
 }
