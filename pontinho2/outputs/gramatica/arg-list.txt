@@ -1,0 +1,15 @@
+Entrada:
+arg-list = = factor {"," expression}.
+Saída:
+arg-list = .0 =.1 factor.2 {.3 ",".4 expression.5  }.3
+
+Início: 0
+Finais: 2
+
+Transicoes:
+(0,=)->1
+(1,factor)->2
+(3,",")->4
+(4,expression)->5
+(2,ε)->3
+(5,ε)->2
