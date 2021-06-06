@@ -3,22 +3,26 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Collections.Generic;
 using OfficeOpenXml;
+using System;
 
 public class Grammar
 {
-    public ReadOnlyDictionary<string, ReadOnlyCollection<Transicao>> transitions;
-    public ReadOnlyDictionary<string, ReadOnlyCollection<int>> finals;
+
+    public ReadOnlyDictionary<string, ReadOnlyCollection<Transicao>> transitions { get => new(_transicoes); }
+    public ReadOnlyDictionary<string, ReadOnlyCollection<int>> finals { get => new(_finais); }
+    public ReadOnlyCollection<string> NTerminais { get => new(nTerminais); }
 
     private Dictionary<string, string> inputs = new();
     private Dictionary<string, string> outputs = new();
-
+    private Dictionary<string, ReadOnlyCollection<Transicao>> _transicoes = new();
+    private Dictionary<string, ReadOnlyCollection<int>> _finais = new();
     private List<string> nTerminais = new();
+
+
 
     public Grammar(string filePath)
     {
 
-        Dictionary<string, ReadOnlyCollection<Transicao>> _transicoes = new();
-        Dictionary<string, ReadOnlyCollection<int>> _finais = new();
 
         var file = new FileInfo(filePath);
         var fileName = file.Name.Replace(file.Extension, "");
@@ -44,23 +48,22 @@ public class Grammar
 
 
             nTerminais.Add(nTerminal);
-            _transicoes[nTerminal] = new ReadOnlyCollection<Transicao>(reader.Run());
-            _finais[nTerminal] = new ReadOnlyCollection<int>(reader.GetFinais());
+            _transicoes[nTerminal] = new(reader.Run());
+            _finais[nTerminal] = new(reader.GetFinais());
             inputs[nTerminal] = data;
             outputs[nTerminal] = ".0 " + reader.GetContent();
             skip += str.Length + 1;
         }
-        transitions = new(_transicoes);
-        finals = new(_finais);
 
-        Directory.CreateDirectory($"outputs/{fileName}");
-        SaveFile($"outputs/{fileName}/");
-        SaveTable($"outputs/{fileName}/");
+
+
+
 
     }
 
     public Grammar SaveFile(string folderPath)
     {
+        Directory.CreateDirectory(folderPath);
         foreach (var nt in nTerminais)
         {
             List<string> tofile = new(transitions[nt].Count);
@@ -91,6 +94,7 @@ public class Grammar
 
     public Grammar SaveTable(string folderPath)
     {
+        Directory.CreateDirectory(folderPath);
         foreach (var nt in nTerminais)
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -137,16 +141,62 @@ public class Grammar
                 collumn++;
             }
 
-            worksheet.Cells[1, collumn].Value = "ε";
-
-            foreach (var t in vazio.OrderBy(x => x.estado).ToArray())
+            if (vazio != null)
             {
-                worksheet.Cells[t.estado + 2, collumn].Value = t.proximo;
+                worksheet.Cells[1, collumn].Value = "ε";
+                foreach (var t in vazio.OrderBy(x => x.estado).ToArray())
+                {
+                    worksheet.Cells[t.estado + 2, collumn].Value = t.proximo;
 
+                }
             }
 
             package.SaveAs(file);
         }
+
+        return this;
+    }
+
+    public Grammar RemoveEmptyTransitions()
+    {
+
+
+        foreach (var nt in nTerminais)
+        {
+            List<Transicao> notEmpty = new(transitions[nt].Where(x => x.entrada != "ε"));
+            List<Transicao> empty = new(transitions[nt].Where(x => x.entrada == "ε"));
+
+            while (empty.Count > 0)
+            {
+                List<Transicao> res = new();
+
+                foreach (var e in empty)
+                {
+                    List<Transicao> nexts = new();
+                    nexts.AddRange(notEmpty.Where(x => x.estado == e.proximo));
+                    nexts.AddRange(empty.Where(x => x.estado == e.proximo));
+
+                    if (_finais[nt].Contains(e.proximo) && !_finais[nt].Contains(e.estado)) _finais[nt].Append(e.estado);
+
+
+                    foreach (var n in nexts)
+                    {
+                        res.Add(new Transicao() { estado = e.estado, proximo = n.proximo, entrada = n.entrada });
+                    }
+
+                }
+                empty.Clear();
+                empty.AddRange(res.Where(x => x.entrada == "ε"));
+                notEmpty.AddRange(res.Where(x => x.entrada != "ε"));
+                Console.WriteLine(empty.Count);
+            }
+
+            _transicoes[nt] = new(notEmpty);
+
+        }
+
+
+
 
         return this;
     }
