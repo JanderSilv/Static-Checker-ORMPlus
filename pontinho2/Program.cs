@@ -11,7 +11,10 @@ foreach (var path in Directory.GetFiles("inputs"))
     .SaveTable($"outputs/{fileName}/bruto/")
     .RemoveEmptyTransitions()
     .SaveFile($"outputs/{fileName}/remVazio/")
-    .SaveTable($"outputs/{fileName}/remVazio/");
+    .SaveTable($"outputs/{fileName}/remVazio/")
+    .RemoveEmptyTransitions()
+    .SaveFile($"outputs/{fileName}/remInacessivel/")
+    .SaveTable($"outputs/{fileName}/remInacessivel/");
 
 
 }

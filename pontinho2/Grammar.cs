@@ -159,8 +159,6 @@ public class Grammar
 
     public Grammar RemoveEmptyTransitions()
     {
-
-
         foreach (var nt in nTerminais)
         {
             List<Transicao> notEmpty = new(transitions[nt].Where(x => x.entrada != "ε"));
@@ -196,6 +194,31 @@ public class Grammar
         }
 
 
+
+
+        return this;
+    }
+
+    public Grammar RemoveUnacessible()
+    {
+        foreach (var nt in nTerminais)
+        {
+            List<Transicao> tr = new(_transicoes[nt]);
+
+            List<int> acessible = new List<int>() { 0 };
+            List<int> considered = new List<int>();
+
+            while (acessible.Count > 0)
+            {
+                int state = acessible[0];
+                acessible.AddRange(tr.Where(x => x.estado == state).Select(x => x.proximo).Distinct());
+                considered.Add(state);
+                acessible.RemoveAll(x => considered.Contains(x));
+            }
+
+            tr.RemoveAll(x => !considered.Contains(x.estado));
+            _transicoes[nt] = new(tr);
+        }
 
 
         return this;
