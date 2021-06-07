@@ -130,12 +130,12 @@ public class Grammar
                 }
 
                 worksheet.Cells[1, collumn].Value = key;
-                var tr = g.OrderBy(x => x.estado).ToArray();
+                var tr = g.OrderBy(x => x.estado).GroupBy(x => x.estado).ToArray();
 
 
                 foreach (var t in tr)
                 {
-                    worksheet.Cells[t.estado + 2, collumn].Value = t.proximo;
+                    worksheet.Cells[t.Key + 2, collumn].Value = string.Join(',', t.Select(x => x.proximo));
 
                 }
                 collumn++;
@@ -199,6 +199,12 @@ public class Grammar
         return this;
     }
 
+    public Grammar RemoveNonDeterministics()
+    {
+
+        return this;
+    }
+
     public Grammar RemoveUnacessible()
     {
         foreach (var nt in nTerminais)
@@ -220,6 +226,176 @@ public class Grammar
             _transicoes[nt] = new(tr);
         }
 
+
+        return this;
+    }
+
+    public Grammar EquivalentStates()
+    {
+
+        Tuple<List<int>, Dictionary<string[], Tuple<int, int>[]>> FindEquivalents(List<Transicao> final_trans)
+        {
+            List<int> final_states = final_trans.Select(x => x.estado).Distinct().ToList(); // estados finais
+            Dictionary<string[], Tuple<int, int>[]> finals_match = new Dictionary<string[], Tuple<int, int>[]>(new MyEqualityComparer());
+
+            while (final_states.Count > 0)
+            {
+                int state = final_states[0];
+
+                string[] cons = final_trans.Where(x => x.estado == state).Select(x => x.entrada).Distinct().OrderBy(k => k).ToArray<string>(); //estado x consome y tokens
+
+
+                int[] similar = final_states.Where(i => final_trans.Where(x => x.estado == i).Select(x => x.entrada).Distinct().OrderBy(k => k).SequenceEqual(cons))
+                .Append(state).Distinct().ToArray<int>();
+
+                List<Tuple<int, int>> tmp = new();
+
+                for (int i = 0; i < similar.Length - 1; i++)
+                {
+                    for (int j = i + 1; j < similar.Length; j++)
+                    {
+                        int a = similar[i];
+                        int b = similar[j];
+                        if (b < a)
+                        {
+                            int aux = b;
+                            b = a;
+                            a = aux;
+                        }
+                        tmp.Add(new(a, b));
+                    }
+                }
+
+                finals_match[cons] = tmp.ToArray();
+
+                final_states.RemoveAll(x => similar.Contains(x));
+            }
+
+
+            return new(final_states, finals_match);
+        }
+
+        foreach (var nt in nTerminais)
+        {
+            List<Transicao> final_trans = _transicoes[nt].Where(x => _finais[nt].Contains(x.estado)).ToList();
+            List<Transicao> nfinal_trans = _transicoes[nt].Where(x => !_finais[nt].Contains(x.estado)).ToList();
+
+            var (final_states, final_eqs) = FindEquivalents(final_trans);
+            var (nfinal_states, nfinal_eqs) = FindEquivalents(nfinal_trans);
+
+
+            List<Tuple<int, int>> equivalents = new();
+            List<Tuple<int, int>> nequivalents = new();
+            Stack<Tuple<int, int>> stack = new();
+
+            int ProxState(int state, string atom) =>
+               _transicoes[nt].Where(x => x.estado == state && x.entrada == atom).Select(x => x.proximo).First();
+
+            Tuple<bool, string[]> SameGroup(Tuple<int, int> tuple)
+            {
+                foreach (var item in final_eqs)
+                {
+                    Tuple<int, int>[] states = item.Value;
+                    if (states.Contains(tuple) || states.Contains(new(tuple.Item2, tuple.Item1))) return new(true, item.Key);
+                }
+                foreach (var item in nfinal_eqs)
+                {
+                    Tuple<int, int>[] states = item.Value;
+                    if (states.Contains(tuple) || states.Contains(new(tuple.Item2, tuple.Item1))) return new(true, item.Key);
+                }
+                return new(false, null);
+            }
+
+            bool checkEq(Tuple<int, int> tuple, string atom)
+            {
+                if (stack.Contains(tuple))
+                {
+                    equivalents.Add(tuple);
+                    return true;
+                }
+
+                if (equivalents.Contains(tuple)) { return true; }
+                if (nequivalents.Contains(tuple)) { return false; }
+
+                int prox1 = ProxState(tuple.Item1, atom);
+                int prox2 = ProxState(tuple.Item2, atom);
+
+                if (prox2 < prox1)
+                {
+                    int aux = prox2;
+                    prox2 = prox1;
+                    prox1 = aux;
+                }
+
+                Tuple<int, int> ntuple = new(prox1, prox2);
+                if (equivalents.Contains(ntuple)) { return true; }
+                if (nequivalents.Contains(ntuple)) { return false; }
+
+                if (prox1 == prox2)
+                {
+                    equivalents.Add(ntuple);
+                    return true;
+                }
+
+                var (sameGroup, atoms) = SameGroup(ntuple);
+                if (sameGroup)
+                {
+                    stack.Push(tuple);
+                    bool res = checkState(ntuple, atoms);
+                    stack.Pop();
+
+                    return res;
+                }
+                else
+                {
+                    nequivalents.Add(ntuple);
+                    return false;
+                }
+
+            }
+
+            bool checkState(Tuple<int, int> state, string[] atoms)
+            {
+                foreach (var a in atoms)
+                {
+                    if (!checkEq(state, a))
+                    {
+                        nequivalents.Add(state);
+                        return false;
+                    }
+                }
+                equivalents.Add(state);
+                return true;
+            }
+
+            foreach (var item in final_eqs)
+            {
+                string[] atoms = item.Key;
+                Tuple<int, int>[] states = item.Value;
+
+                foreach (var state in states)
+                {
+                    checkState(state, atoms);
+                }
+            }
+
+            foreach (var item in nfinal_eqs)
+            {
+                string[] atoms = item.Key;
+                Tuple<int, int>[] states = item.Value;
+
+                foreach (var state in states)
+                {
+                    checkState(state, atoms);
+                }
+            }
+
+            Console.WriteLine("\nEquivalentes");
+            foreach (var item in equivalents.Distinct())
+            {
+                Console.WriteLine($"({item.Item1},{item.Item2})");
+            }
+        }
 
         return this;
     }

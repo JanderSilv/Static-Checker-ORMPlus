@@ -14,7 +14,8 @@ foreach (var path in Directory.GetFiles("inputs"))
     .SaveTable($"outputs/{fileName}/remVazio/")
     .RemoveEmptyTransitions()
     .SaveFile($"outputs/{fileName}/remInacessivel/")
-    .SaveTable($"outputs/{fileName}/remInacessivel/");
+    .SaveTable($"outputs/{fileName}/remInacessivel/")
+    .EquivalentStates();
 
 
 }
