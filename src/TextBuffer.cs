@@ -19,7 +19,7 @@ public class TextBuffer
         else return '\0';
     }
 
-    public string GetUntil(char c)
+    public string GetUntil(char c, bool consume = true)
     {
         StringBuilder sb = new();
         char g = GetNext();
@@ -29,7 +29,20 @@ public class TextBuffer
             sb.Append(g);
             g = GetNext();
         }
-        sb.Append(g);
+        if (!consume) index--;
+        return sb.ToString();
+    }
+    public string GetUntil(string c, bool consume = true)
+    {
+        StringBuilder sb = new();
+        char g = GetNext();
+        while (true)
+        {
+            if (c.Contains(g) || g == '\0') break;
+            sb.Append(g);
+            g = GetNext();
+        }
+        if (!consume) index--;
         return sb.ToString();
     }
 }

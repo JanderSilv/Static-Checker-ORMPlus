@@ -3,7 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
-
+using OfficeOpenXml.Style;
+using static System.Console;
 public class Grammar
 {
     readonly string fileName, filePath;
@@ -18,7 +19,10 @@ public class Grammar
 
         ReadNoTerminals();
 
-        foreach (var nt in noTerminals) nt.Parse();
+        foreach (var nt in noTerminals)
+        {
+            nt.Parse();
+        }
 
     }
 
@@ -34,7 +38,7 @@ public class Grammar
             List<string> tofile = new(tr.Count());
 
             tofile.Add($"Entrada:\n{nt.name} = {nt.input}");
-            tofile.Add($"Saída:\n{nt.name} = {nt.Output}");
+            tofile.Add($"Saída:\n{nt.name} ={nt.Output}");
             tofile.Add($"\nInício: 0");
             tofile.Add($"Finais: {string.Join(',', nt.States.Where(x => x.Final).Select(x => x.ID))}\n");
 
@@ -48,20 +52,14 @@ public class Grammar
             {
                 tofile.Add(item.ToString());
             }
-            Console.WriteLine(nt.name);
+
             File.WriteAllLines(filePath + $"{nt.name}.txt", tofile);
         }
         return this;
     }
-
     public Grammar SaveXlsx(string filePath)
     {
         Directory.CreateDirectory(filePath);
-
-        //  List<string> atoms = noTerminals.SelectMany(x => x.).
-
-
-
 
         foreach (var nt in noTerminals)
         {
@@ -106,9 +104,29 @@ public class Grammar
                         worksheet.Cells[i + 2, j + 2].Value = v;
                     }
                 }
+
+                if (nt.States[i].Final)
+                {
+
+                    worksheet.Cells[i + 2, 1].Style.Border.Top.Style = ExcelBorderStyle.Thick;
+                    worksheet.Cells[i + 2, 1].Style.Border.Right.Style = ExcelBorderStyle.Thick;
+                    worksheet.Cells[i + 2, 1].Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
+                    worksheet.Cells[i + 2, 1].Style.Border.Left.Style = ExcelBorderStyle.Thick;
+                    worksheet.Cells[i + 2, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[i + 2, 1].Style.Fill.BackgroundColor.SetColor(128, 0, 0, 128);
+                }
             }
 
             package.SaveAs(file);
+        }
+        return this;
+    }
+
+    public Grammar Use(IOptimizer optimizer)
+    {
+        foreach (var nt in noTerminals)
+        {
+            nt.Use(optimizer);
         }
         return this;
     }

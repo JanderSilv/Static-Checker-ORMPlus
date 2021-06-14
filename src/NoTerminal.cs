@@ -21,26 +21,28 @@ public class NoTerminal
     public void Parse()
     {
         TextBuffer buffer = new(input);
-        Tokenizer tokenizer = new Tokenizer(buffer, counter: 1);
-
-        List<Transition> transitions = tokenizer.GetTransitions();
-        List<int> finals = tokenizer.GetFinais();
-
-        var trGroup = transitions.GroupBy(x => x.state);
-
-        List<State> _states = trGroup.Select(k => new State(k.Key)).ToList();
+        TokenInit tk = new TokenInit(buffer);
+        List<Transition> transitions = tk.GetTransitions().OrderBy(x => x.state).ToList();
+        List<int> finals = tk.GetFinals.ToList();
+        List<State> _states = transitions.Select(k => k.state).Concat(finals).Distinct().Select(i => new State(i)).ToList();
 
         foreach (var st in _states)
         {
             st.Final = finals.Contains(st.ID);
-            var atomGroup = trGroup.Where(x => x.Key == st.ID).Single().GroupBy(x => x.input);
-            foreach (var atom in atomGroup)
+            var trs = transitions.Where(x => x.state == st.ID).Select(t => new { t.input, t.next });
+
+            foreach (var tr in trs)
             {
-                st[atom.Key] = atom.Select(x => x.next).SelectMany(i => _states.Where(s => s.ID == i).ToList()).ToList();
+                st[tr.input] = _states.Where(s => s.ID == tr.next).ToList();
             }
         }
 
         this.states = _states;
-        this.output = tokenizer.GetContent();
+        this.output = tk.ToString();
+    }
+
+    public void Use(IOptimizer optimizer)
+    {
+        states = optimizer.Optimizer(states);
     }
 }

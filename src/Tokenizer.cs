@@ -125,7 +125,7 @@ public class Tokenizer
         void colchetes()
         {
             clearBuffer();
-            transicoes.Add(new() { input = "ε", state = lastCounter, next = counter });
+            transicoes.Add(new() { input = "ε", state = lastCounter, next = outCounter });
             Tokenizer r = new Tokenizer(source, lastCounter, context: Context.Optional);
             r.SetBound(NextCounter());
             var res = r.GetTransitions();
@@ -137,7 +137,7 @@ public class Tokenizer
         void chaves()
         {
             clearBuffer();
-            transicoes.Add(new() { input = "ε", state = lastCounter, next = counter });
+            transicoes.Add(new() { input = "ε", state = lastCounter, next = outCounter });
             Tokenizer r = new Tokenizer(source, 0, context: Context.Recursive);
             r.SetBound(counter);
             var res = r.GetTransitions();
@@ -203,6 +203,6 @@ public class Tokenizer
             item.input = item.input.Trim();
         }
         saidas.Add(GetLast());
-        return transicoes.Distinct().ToList();
+        return transicoes.ToList();
     }
 }

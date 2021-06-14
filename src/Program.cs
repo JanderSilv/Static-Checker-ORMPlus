@@ -18,7 +18,6 @@ if (args.Length > 1)
         else if (File.Exists(input_path)) files_to_read.Add(input_path);
 
     }
-
 }
 else
 {
@@ -33,5 +32,10 @@ Console.WriteLine(string.Join(',', files_to_read));
 
 foreach (var path in files_to_read)
 {
-    new Grammar(path).SaveTxt("./output/").SaveXlsx("./output/");
+    new Grammar(path)
+        .SaveTxt("./output/Bruto/")
+        .SaveXlsx("./output/Bruto/")
+    .Use(new RemoveEmpty())
+        .SaveTxt("./output/RemVazio/")
+        .SaveXlsx("./output/RemVazio/");
 }
