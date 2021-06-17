@@ -5,7 +5,7 @@ public class State
 {
     public int ID { get; set; }
     public bool Final { get; set; }
-    public bool Deterministic => _transitions.All(x => x.Value.Count == 1) && !_transitions.ContainsKey("ε");
+    public bool Deterministic => _transitions.All(x => x.Value.Count <= 1) && (this["ε"] == null || this["ε"].Count == 0);
     public IEnumerable<Transition> Transitions => _transitions.SelectMany(a => a.Value.Select(s => new Transition() { state = ID, input = a.Key, next = s.ID }));
 
     public IEnumerable<string> Inputs => _transitions.Keys;
@@ -28,6 +28,7 @@ public class State
 
     public void AddTransition(string token, State state)
     {
+        if (!_transitions.ContainsKey(token)) _transitions[token] = new();
         _transitions[token].Add(state);
     }
 
@@ -48,4 +49,8 @@ public class State
         return null;
     }
 
+    public Dictionary<string, List<State>> GetNonDeterministcTransitions()
+    {
+        return new(_transitions.Where(x => x.Value.Count > 1));
+    }
 }

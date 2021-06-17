@@ -37,5 +37,8 @@ foreach (var path in files_to_read)
         .SaveXlsx("./output/Bruto/")
     .Use(new RemoveEmpty())
         .SaveTxt("./output/RemVazio/")
-        .SaveXlsx("./output/RemVazio/");
+        .SaveXlsx("./output/RemVazio/")
+    .Use(new RemoveNonDeterministic())
+        .SaveTxt("./output/RemNonDet/")
+        .SaveXlsx("./output/RemNonDet/");
 }
