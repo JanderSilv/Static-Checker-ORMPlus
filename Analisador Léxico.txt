@@ -1,0 +1,39 @@
+
+
+A ordem de verificação é:
+1. Identificador (Nome de variável)
+  1.1. Regex: (Letra | underline)(Letra | Digito | underline)*
+  1.2. Se fugir dessa regra, passa a ser um delimitador
+2. Delimitador
+  2.1. Qualquer "coisa" que não seja Letra, Digito, ou underline.
+
+--------------------------------------------------
+Exemplo 1:
+
+IF(ABCD>=10.87)
+
+Passa pelos caracteres I e F, ao passar pelo ( , identifica que não corresponde a um identificador, pega o IF, verifica na tabela de símbolos se é uma palavra reservada, caso não seja, esse átomo é uma variável.
+
+Ao passar pelo parênteses, o próximo elemento será o delimitador, armazenando o parenteses como 2° átomo encontrado.
+
+Percorre o ABCD, o > quebra a regra de Identificador e por isso serve de delimitador, pegando o ABCD como 3° átomo, vai na tabela de palavras reservas e verifica se é uma, caso não, é um identificador
+
+-------------------------------------------------- 
+Exemplo 2: Caracteres inválidos
+
+TES@@@@TE == 10;
+
+Os @ serão ignorados por serem caracteres inválidos, formando o átomo TESTE
+
+-------------------------------------------------- 
+01/06 - 1h20min
+Exemplo 3: Comentários
+
+TES/*ABC*/TE := 10;
+
+O comentário servirá de delimitador para o TES, formando o átomo TES.
+-------------------------------------------------- 
+
+
+
+-------------------------------------------------- 
