@@ -64,6 +64,7 @@ public class Grammar
         foreach (var nt in noTerminals)
         {
             List<string> atoms = nt.States.SelectMany(x => x.Transitions.Select(x => x.input)).Distinct().ToList();
+
             atoms.Remove("ε");
             atoms.Add("ε");
 

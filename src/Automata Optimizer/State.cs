@@ -8,6 +8,7 @@ public class State
     public bool Deterministic => _transitions.All(x => x.Value.Count <= 1) && (this["ε"] == null || this["ε"].Count == 0);
     public IEnumerable<Transition> Transitions => _transitions.SelectMany(a => a.Value.Select(s => new Transition() { state = ID, input = a.Key, next = s.ID }));
 
+    public IEnumerable<State> Childs => _transitions.SelectMany(a => a.Value).Distinct();
     public IEnumerable<string> Inputs => _transitions.Keys;
     public List<State> this[string atom]
     {
@@ -18,6 +19,7 @@ public class State
             _transitions[atom].AddRange(value);
         }
     }
+
 
     private Dictionary<string, List<State>> _transitions = new();
 
@@ -42,6 +44,13 @@ public class State
     }
 
     public void RemoveTransition(string token) => _transitions.Remove(token);
+    public void RemoveTransition(State state)
+    {
+        foreach (var kp in _transitions)
+        {
+            if (_transitions[kp.Key].Contains(state)) _transitions[kp.Key].Remove(state);
+        }
+    }
 
     public List<State> OnIput(string input)
     {

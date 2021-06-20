@@ -28,7 +28,7 @@ else
     else if (File.Exists(input_path)) files_to_read.Add(input_path);
 }
 
-Console.WriteLine(string.Join(',', files_to_read));
+
 
 foreach (var path in files_to_read)
 {
@@ -40,5 +40,11 @@ foreach (var path in files_to_read)
         .SaveXlsx("./output/RemVazio/")
     .Use(new RemoveNonDeterministic())
         .SaveTxt("./output/RemNonDet/")
-        .SaveXlsx("./output/RemNonDet/");
+        .SaveXlsx("./output/RemNonDet/")
+    .Use(new RemoveNonAcessible())
+        .SaveTxt("./output/RemNonAcess/")
+        .SaveXlsx("./output/RemNonAcess/")
+    .Use(new RemoveEquivalent())
+        .SaveTxt("./output/RemEq/")
+        .SaveXlsx("./output/RemEq/");
 }
