@@ -4,10 +4,10 @@ namespace Lexer
 
     public class AtomInteger : Atom
     {
-        public override string Code => "C03";
+
         public AtomInteger(Atom a) : base(a)
         {
-
+            Code = "C03";
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {

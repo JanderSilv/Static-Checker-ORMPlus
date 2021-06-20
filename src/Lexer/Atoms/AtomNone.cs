@@ -2,8 +2,6 @@ namespace Lexer
 {
     public class AtomNone : Atom
     {
-        public override string Code => null;
-
         public AtomNone() : base(null)
         {
 
@@ -27,7 +25,7 @@ namespace Lexer
                     return (new AtomCharacter(this), null);
 
                 default:
-                    if (char.IsSymbol(c) || char.IsPunctuation(c))
+                    if (ValidSymbol(c))
                     {
                         lexeme.Append(c);
                         return (new AtomSymbol(this), null);

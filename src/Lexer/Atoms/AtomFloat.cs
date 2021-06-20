@@ -2,11 +2,11 @@ namespace Lexer
 {
     public class AtomExponent : Atom
     {
-        public override string Code => "C06";
+
         private bool signed = false;
         public AtomExponent(Atom a) : base(a)
         {
-
+            Code = "C06";
         }
 
         public override (Atom, Atom) ConsumeChar(char c)
@@ -37,11 +37,9 @@ namespace Lexer
     }
     public class AtomFloat : Atom
     {
-
-        public override string Code => "C06";
         public AtomFloat(Atom a) : base(a)
         {
-
+            Code = "C06";
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {

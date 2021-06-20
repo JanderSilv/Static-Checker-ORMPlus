@@ -2,10 +2,9 @@ namespace Lexer
 {
     public class MiddleString : Atom
     {
-        public override string Code => "";
         public MiddleString(Atom a) : base(a)
         {
-
+            Code = null;
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {
@@ -24,10 +23,9 @@ namespace Lexer
     }
     public class AtomString : Atom
     {
-        public override string Code => "C02";
         public AtomString(Atom a) : base(a)
         {
-
+            Code = "C02";
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {

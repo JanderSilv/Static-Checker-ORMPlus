@@ -2,11 +2,9 @@ namespace Lexer
 {
     public class AtomIdentifier : Atom
     {
-        string code = "C01";
-        public override string Code => code;
         public AtomIdentifier(Atom a) : base(a)
         {
-
+            Code = "C01";
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {
@@ -17,7 +15,7 @@ namespace Lexer
                     return (this, null);
                 default:
                     string cod = ReservedTable.GetTokenCode(this.Lexeme);
-                    if (cod != null) code = cod;
+                    if (cod != null) Code = cod;
                     return (new AtomNone().ConsumeChar(c).Item1, this);
             };
         }

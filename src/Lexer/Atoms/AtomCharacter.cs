@@ -2,7 +2,7 @@ namespace Lexer
 {
     public class MiddleCharacter : Atom
     {
-        public override string Code => "";
+
         public MiddleCharacter(Atom a) : base(a)
         {
 
@@ -21,10 +21,9 @@ namespace Lexer
     }
     public class AtomCharacter : Atom
     {
-        public override string Code => "C05";
         public AtomCharacter(Atom a) : base(a)
         {
-
+            Code = "C05";
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {

@@ -2,25 +2,30 @@ namespace Lexer
 {
     public class AtomSymbol : Atom
     {
-        string code = "";
-        public override string Code => code;
         public AtomSymbol(Atom a) : base(a)
         {
 
         }
         public override (Atom, Atom) ConsumeChar(char c)
         {
-            if (char.IsSymbol(c))
+            if (ValidSymbol(c))
             {
-                lexeme.Append(c);
-                return (this, null);
+                if (Lexeme + c == "//" || Lexeme + c == "/*")
+                {
+                    lexeme.Append(c);
+                    return (new AtomComment(this), null);
+                }
+                if (ReservedTable.GetTokenCode(Lexeme + c) != null)
+                {
+                    lexeme.Append(c);
+                    return (this, null);
+                }
             }
-            else
-            {
-                string cod = ReservedTable.GetTokenCode(this.Lexeme);
-                if (cod != null) code = cod;
-                return (new AtomNone().ConsumeChar(c).Item1, this);
-            }
+
+            Code = ReservedTable.GetTokenCode(this.Lexeme);
+            return (new AtomNone().ConsumeChar(c).Item1, this);
+
+
         }
     }
 

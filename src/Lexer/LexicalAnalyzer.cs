@@ -5,7 +5,7 @@ namespace Lexer
     public class LexicalAnalizer
     {
         FileReader source;
-
+        Atom current = new AtomNone();
         public LexicalAnalizer(FileReader Source)
         {
             source = Source;
@@ -14,7 +14,7 @@ namespace Lexer
         public Atom NextToken()
         {
             char? c = null;
-            Atom current = new AtomNone();
+
             Atom formed = null;
 
             while (formed == null)
