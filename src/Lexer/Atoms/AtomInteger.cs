@@ -2,14 +2,14 @@ namespace Lexer
 {
 
 
-    public class AtomInteger : Atom
+    public record AtomInteger : Atom
     {
 
         public AtomInteger(Atom a) : base(a)
         {
             Code = "C03";
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             switch (c)
             {
@@ -20,7 +20,7 @@ namespace Lexer
                     lexeme.Append(c);
                     return (new AtomFloat(this), null);
                 default:
-                    return (new AtomNone().ConsumeChar(c).Item1, this);
+                    return (new AtomNone().ConsumeChar(c, reader).Item1, this);
             };
         }
     }

@@ -1,12 +1,12 @@
 namespace Lexer
 {
-    public class MiddleString : Atom
+    public record MiddleString : Atom
     {
         public MiddleString(Atom a) : base(a)
         {
             Code = null;
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             switch (c)
             {
@@ -17,17 +17,17 @@ namespace Lexer
                     lexeme.Append(c);
                     return (new AtomNone(), new AtomString(this));
                 default:
-                    return (new AtomNone().ConsumeChar(c).Item1, null);
+                    return (new AtomNone().ConsumeChar(c, reader).Item1, null);
             };
         }
     }
-    public class AtomString : Atom
+    public record AtomString : Atom
     {
         public AtomString(Atom a) : base(a)
         {
             Code = "C02";
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             switch (c)
             {
@@ -35,7 +35,7 @@ namespace Lexer
                     lexeme.Append(c);
                     return (new MiddleString(this), null);
                 default:
-                    return (new AtomNone().ConsumeChar(c).Item1, this);
+                    return (new AtomNone().ConsumeChar(c, reader).Item1, this);
             };
         }
     }

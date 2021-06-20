@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 
@@ -20,16 +21,21 @@ namespace Lexer
 
             while (!ValidChar(currentChar = text[currentIndex++]))
             {
-                switch (currentChar)
-                {
-                    case '\n':
-                        CurrentLine++;
-                        break;
-                }
+
             }
 
+            if (currentChar == '\n') CurrentLine++;
 
             return currentChar;
+        }
+        public void Rev(int qnt)
+        {
+            int end = Math.Max(0, currentIndex - qnt);
+
+            for (; currentIndex > end; currentIndex--)
+            {
+                if (text[currentIndex] == '\n') CurrentLine--;
+            }
         }
         private bool EOF()
         {
@@ -57,9 +63,9 @@ namespace Lexer
         }
         private bool ValidChar(char c)
         {
-            if (!(char.IsLetterOrDigit(c) || "\n!=#&();[]{},<>%/*+-\"$_. ".Contains(c))) return false;
+            if ((char.IsLetterOrDigit(c) || "\n!=#&();[]{},<>%/*+-\"$_. ".Contains(c))) return true;
 
-            return true;
+            return false;
         }
     }
 }

@@ -1,12 +1,12 @@
 namespace Lexer
 {
-    public class AtomSymbol : Atom
+    public record AtomSymbol : Atom
     {
         public AtomSymbol(Atom a) : base(a)
         {
 
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             if (ValidSymbol(c))
             {
@@ -23,7 +23,7 @@ namespace Lexer
             }
 
             Code = ReservedTable.GetTokenCode(this.Lexeme);
-            return (new AtomNone().ConsumeChar(c).Item1, this);
+            return (new AtomNone().ConsumeChar(c, reader).Item1, this);
 
 
         }

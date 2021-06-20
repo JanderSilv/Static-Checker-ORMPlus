@@ -1,10 +1,5 @@
-//program init
-Int a = 5;
- c !=== b; 
- b = (5);
- d = "Hello World"
-/*
-MyFunc
-            Input: None
-            Return: Int
-        */
+//teste
+/*adasd */
+ Int a = 5.(54);
+
+

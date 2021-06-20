@@ -1,6 +1,6 @@
 namespace Lexer
 {
-    public class AtomComment : Atom
+    public record AtomComment : Atom
     {
         private bool multline = false;
         public AtomComment(Atom a) : base(a)
@@ -9,7 +9,7 @@ namespace Lexer
             lexeme.Clear();
 
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             lexeme.Append(c);
 

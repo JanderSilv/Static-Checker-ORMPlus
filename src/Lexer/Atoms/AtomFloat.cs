@@ -1,6 +1,8 @@
+using System.Linq;
+
 namespace Lexer
 {
-    public class AtomExponent : Atom
+    public record AtomExponent : Atom
     {
 
         private bool signed = false;
@@ -9,7 +11,7 @@ namespace Lexer
             Code = "C06";
         }
 
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             switch (c)
             {
@@ -22,7 +24,7 @@ namespace Lexer
                     }
                     else
                     {
-                        return (new AtomNone().ConsumeChar(c).Item1, this);
+                        return (new AtomNone().ConsumeChar(c, reader).Item1, this);
                     }
 
                 case (>= '0' and <= '9'):
@@ -31,18 +33,26 @@ namespace Lexer
                     return (this, null);
                 default:
                     string cod = ReservedTable.GetTokenCode(this.Lexeme);
-                    return (new AtomNone().ConsumeChar(c).Item1, this);
+                    return (new AtomNone().ConsumeChar(c, reader).Item1, this);
             };
         }
     }
-    public class AtomFloat : Atom
+    public record AtomFloat : Atom
     {
+        bool fr = true;
         public AtomFloat(Atom a) : base(a)
         {
             Code = "C06";
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
+            if (fr && !char.IsDigit(c))
+            {
+                reader.Rev(2);
+                lexeme.Remove(lexeme.Length - 1, 1);
+                return (new AtomNone(), new AtomInteger(this));
+            }
+            fr = false;
             switch (c)
             {
                 case (>= '0' and <= '9'):
@@ -53,7 +63,7 @@ namespace Lexer
                     return (new AtomExponent(this), null);
                 default:
                     string cod = ReservedTable.GetTokenCode(this.Lexeme);
-                    return (new AtomNone().ConsumeChar(c).Item1, this);
+                    return (new AtomNone().ConsumeChar(c, reader).Item1, this);
             };
         }
     }

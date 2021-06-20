@@ -1,12 +1,12 @@
 namespace Lexer
 {
-    public class AtomNone : Atom
+    public record AtomNone : Atom
     {
         public AtomNone() : base(null)
         {
 
         }
-        public override (Atom, Atom) ConsumeChar(char c)
+        public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {
             switch (c)
             {
