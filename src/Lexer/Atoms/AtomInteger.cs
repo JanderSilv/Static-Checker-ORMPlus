@@ -1,10 +1,11 @@
 namespace Lexer
 {
-    public class AtomComma : Atom
-    {
 
-        public override string Code => "B09";
-        public AtomComma(Atom a) : base(a)
+
+    public class AtomInteger : Atom
+    {
+        public override string Code => "C03";
+        public AtomInteger(Atom a) : base(a)
         {
 
         }
@@ -12,9 +13,12 @@ namespace Lexer
         {
             switch (c)
             {
-                case ';':
+                case (>= '0' and <= '9'):
                     lexeme.Append(c);
                     return (this, null);
+                case '.':
+                    lexeme.Append(c);
+                    return (new AtomFloat(this), null);
                 default:
                     return (new AtomNone().ConsumeChar(c).Item1, this);
             };

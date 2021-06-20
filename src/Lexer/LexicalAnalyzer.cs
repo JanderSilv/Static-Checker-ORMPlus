@@ -11,17 +11,28 @@ namespace Lexer
             source = Source;
         }
 
-        public void NextToken()
+        public Atom NextToken()
         {
-            char? c;
+            char? c = null;
             Atom current = new AtomNone();
             Atom formed = null;
 
-            while ((c = source.GetNext()) != null)
+            while (formed == null)
             {
-                (current, formed) = current.ConsumeChar(c.Value);
-                if (formed != null) WriteLine(formed);
+                c = source.GetNext();
+
+                if (c == null)
+                {
+                    (current, formed) = current.ConsumeChar(' ');
+                    break;
+                }
+                else
+                    (current, formed) = current.ConsumeChar(c.Value);
+
             }
+
+            return formed;
+
         }
     }
 }

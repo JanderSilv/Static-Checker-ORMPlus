@@ -10,22 +10,22 @@ namespace Lexer
         {
             reservedTable = new()
             {
-                { "Bool", "A01" },
-                { "Begin", "A02" },
-                { "While", "A03" },
-                { "Return", "A04" },
-                { "Break", "A05" },
-                { "False", "A06" },
-                { "Void", "A07" },
-                { "Program", "A08" },
-                { "Char", "A09" },
-                { "Float", "A10" },
-                { "True", "A11" },
-                { "Int", "A12" },
-                { "If", "A13" },
-                { "Else", "A14" },
-                { "String ", "A15" },
-                { "End", "A16" },
+                { "BOOL", "A01" },
+                { "BEGIN", "A02" },
+                { "WHILE", "A03" },
+                { "RETURN", "A04" },
+                { "BREAK", "A05" },
+                { "FALSE", "A06" },
+                { "VOID", "A07" },
+                { "PROGRAM", "A08" },
+                { "CHAR", "A09" },
+                { "FLOAT", "A10" },
+                { "TRUE", "A11" },
+                { "INT", "A12" },
+                { "IF", "A13" },
+                { "ELSE", "A14" },
+                { "STRING", "A15" },
+                { "END", "A16" },
                 { "!=", "B01" },
                 { "!", "B02" },
                 { "&", "B03" },
@@ -55,7 +55,8 @@ namespace Lexer
 
         public static string GetTokenCode(string identifier)
         {
-            if (reservedTable.ContainsKey(identifier)) return reservedTable[identifier];
+            string str = identifier.ToUpper();
+            if (reservedTable.ContainsKey(str)) return reservedTable[str];
             return null;
         }
 

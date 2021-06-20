@@ -57,7 +57,7 @@ namespace Lexer
         }
         private bool ValidChar(char c)
         {
-            if (!(char.IsLetterOrDigit(c) || "\n!=#&();[]{},<>%/*+-|\"$_ ".Contains(c))) return false;
+            if (!(char.IsLetterOrDigit(c) || "\n!=#&();[]{},<>%/*+-|\"$_. ".Contains(c))) return false;
 
             return true;
         }
