@@ -22,6 +22,9 @@ namespace Lexer
                 case '\"':
                     lexeme.Append(c);
                     return (new AtomString(this), null);
+                case '\'':
+                    lexeme.Append(c);
+                    return (new AtomCharacter(this), null);
 
                 default:
                     if (char.IsSymbol(c) || char.IsPunctuation(c))
