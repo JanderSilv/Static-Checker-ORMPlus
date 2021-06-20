@@ -1,5 +1,5 @@
-﻿using System;
-using Lexer;
+﻿using Lexer;
+using static System.Console;
 
 string input_path = "test.c";
 
@@ -9,5 +9,8 @@ Atom token = null;
 
 while ((token = lex.NextToken()) != null)
 {
-    Console.WriteLine(token);
+    WriteLine(token.Print());
 }
+WriteLine();
+WriteLine();
+WriteLine(SymbolTable.ToString());

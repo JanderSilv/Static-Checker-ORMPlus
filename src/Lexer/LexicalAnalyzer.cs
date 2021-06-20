@@ -35,7 +35,12 @@ namespace Lexer
                 }
 
             }
-            if (formed != null) formed.LineOcurrency = line;
+            if (formed != null)
+            {
+                formed.LineOcurrency = line;
+                formed.Truncate();
+                if (formed.Identifier) SymbolTable.AddSymbol(new Symbol(formed));
+            }
 
             return formed;
 
