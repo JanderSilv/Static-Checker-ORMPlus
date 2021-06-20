@@ -3,7 +3,7 @@
 Program
     Begin
         String nomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaa;
-        nomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaa = "Ruan";
+        nomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaanomeaaaaaa = "Ruaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaan";
         Int av1,av2,av3;
 
         av1 = 70000000000000000000000008.24854864;
