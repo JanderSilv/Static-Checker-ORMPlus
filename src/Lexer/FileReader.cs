@@ -12,7 +12,7 @@ namespace Lexer
 
         public FileReader(string path)
         {
-            text = File.ReadAllText(path);
+            text = File.ReadAllText(path).ToUpper();
         }
         public char? GetNext()
         {
