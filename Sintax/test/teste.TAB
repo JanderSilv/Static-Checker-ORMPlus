@@ -1,0 +1,16 @@
+EQUIPE    E05
+
+COMPONENTES:     
+Nome                    Email                                     Telefone
+Jander Almeida Silva    jander.silva@aln.senaicimatec.com.br     (71) 99961-6841
+Jafe Ferreira           jafe.ferreira@aln.senaicimatec.edu.br    (71) 8815-3915
+Ruan Nilton Azevedo     ruan.azevedo@aln.senaicimatec.edu.br     (75) 8334-6684
+
+
+
+
+Entrada|Lexema|Codigo|Tipo          |Tam. Original|Tam. Truncado|Aparicoes(5)
+-----------------------------------------------------------------------------
+0      |NAME  |C01   |Identifier    |4            |4            |2,4         
+1      |TESTE |C04   |Function      |5            |5            |3           
+2      |5     |C03   |Integer-Number|1            |1            |4           
