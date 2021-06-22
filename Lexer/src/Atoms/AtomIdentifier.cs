@@ -4,7 +4,7 @@ namespace Lexer
     {
         public AtomIdentifier(Atom a) : base(a)
         {
-            Code = "C01";
+            Code = "C04";
         }
         public override (Atom, Atom) ConsumeChar(char c, FileReader reader)
         {

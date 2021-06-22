@@ -5,7 +5,7 @@ namespace Lexer
     public abstract record Atom
     {
         protected StringBuilder lexeme;
-        public string Code { get; protected set; } = null;
+        public string Code { get; set; } = null;
         public string Lexeme => lexeme.ToString();
         public int LineOcurrency = 0;
         public int OriginalLenght = 0;

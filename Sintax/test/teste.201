@@ -1,0 +1,9 @@
+    Begin
+        Int name;;
+        Void teste(){
+            if(name == 5){
+                
+            }
+        }
+       
+    End

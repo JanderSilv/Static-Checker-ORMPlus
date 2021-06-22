@@ -8,6 +8,7 @@ public class Transition
         return $"({state},{input})->{next}";
     }
 
+
     public override bool Equals(object obj)
     {
         if (obj is Transition)

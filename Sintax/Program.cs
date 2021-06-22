@@ -1,12 +1,14 @@
 ﻿using System;
 
-namespace Sintax
+if (args.Length < 1)
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
-    }
+    Console.WriteLine("Caminho de arquivo não informado.");
+    return;
 }
+
+
+for (int i = 0; i < args.Length; i++)
+{
+    Sintax s = new(args[i]);
+}
+

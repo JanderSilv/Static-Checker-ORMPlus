@@ -39,7 +39,14 @@ namespace Lexer
             {
                 formed.LineOcurrency = line;
                 formed.Truncate();
-                if (formed.Identifier) SymbolTable.AddSymbol(new Symbol(formed));
+                int? exist = SymbolTable.ExistSymbol(formed.Lexeme);
+                if (exist != null)
+                {
+                    Symbol s = SymbolTable.GetSymbol(exist.Value);
+                    formed.Code = s.Code;
+                }
+
+                SymbolTable.AddSymbol(formed);
             }
 
             return formed;

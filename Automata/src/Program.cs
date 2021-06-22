@@ -47,5 +47,6 @@ foreach (var path in files_to_read)
     .Use(new RemoveEquivalent())
         .SaveTxt("./output/5_Otimo/")
         .SaveXlsx("./output/5_Otimo/")
+        .SaveRules("./output/5_Otimo/")
     ;
 }

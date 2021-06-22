@@ -10,6 +10,55 @@ public class Grammar
     readonly string fileName, filePath;
     List<NoTerminal> noTerminals = new();
 
+    private readonly Dictionary<string, string> reservedTable = new()
+    {
+        { "BOOL", "A01" },
+        { "BEGIN", "A02" },
+        { "WHILE", "A03" },
+        { "RETURN", "A04" },
+        { "BREAK", "A05" },
+        { "FALSE", "A06" },
+        { "VOID", "A07" },
+        { "PROGRAM", "A08" },
+        { "CHAR", "A09" },
+        { "FLOAT", "A10" },
+        { "TRUE", "A11" },
+        { "INT", "A12" },
+        { "IF", "A13" },
+        { "ELSE", "A14" },
+        { "STRING", "A15" },
+        { "END", "A16" },
+        { "!=", "B01" },
+        { "!", "B02" },
+        { "&", "B03" },
+        { "%", "B04" },
+        { "(", "B05" },
+        { "/", "B06" },
+        { ")", "B07" },
+        { "*", "B08" },
+        { ";", "B09" },
+        { "+", "B10" },
+        { "[", "B11" },
+        { "]", "B12" },
+        { "{", "B13" },
+        { "|", "B14" },
+        { "}", "B16" },
+        { ",", "B15" },
+        { "<", "B18" },
+        { "<=", "B17" },
+        { "==", "B20" },
+        { "=", "B19" },
+        { ">=", "B21" },
+        { ">", "B22" },
+        { "-", "B23" },
+        { "#", "B24" },
+        { "IDENTIFIER", "C01" },
+        { "CONSTANT-STRING", "C02" },
+        { "INTEGER-NUMBER", "C03" },
+        { "FUNCTION", "C04" },
+        { "CHARACTER", "C05" },
+        { "FLOAT-NUMBER", "C06" },
+    };
     public Grammar(string filePath)
     {
         FileInfo fileInfo = new FileInfo(filePath);
@@ -57,6 +106,27 @@ public class Grammar
         }
         return this;
     }
+
+    public Grammar SaveRules(string filePath)
+    {
+        Directory.CreateDirectory(filePath);
+        foreach (var nt in noTerminals)
+        {
+            IEnumerable<Transition> transitions = nt.States.SelectMany(x => x.Transitions).Where(x => x.input != "ε").OrderBy(x => x.state);
+
+            List<string> tofile = new(transitions.Count());
+
+            foreach (var item in transitions)
+            {
+                tofile.Add($"{item.state},{reservedTable[item.input.ToUpper()]},{item.next}");
+            }
+
+
+            File.WriteAllLines(filePath + $"{nt.name}.rule", tofile);
+        }
+        return this;
+    }
+
     public Grammar SaveXlsx(string filePath)
     {
         Directory.CreateDirectory(filePath);
@@ -146,6 +216,8 @@ public class Grammar
             if (string.IsNullOrWhiteSpace(nt_name) || string.IsNullOrWhiteSpace(nt_content)) { fileIndex += nt_full.Length + 1; continue; }
 
             noTerminals.Add(new(nt_name, nt_content));
+            if (!reservedTable.ContainsKey(nt_name.ToUpper()))
+                reservedTable.Add(nt_name.ToUpper(), nt_name.ToUpper());
 
             fileIndex += nt_full.Length + 1;
         }
